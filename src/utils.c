@@ -154,11 +154,7 @@ int getDigit(int n) {
 char *getBaseName(char *path) {
     char *file = path + strlen(path);
     for (; file > path; file--) {
-        if (*file == '/'
-#ifdef _WIN32
-            || *file == '\\'
-#endif
-        ) {
+        if (*file == '/') {
             file++;
             break;
         }
@@ -183,12 +179,7 @@ char *getDirName(char *path) {
 void addDefaultExtension(char *path, const char *extension, int path_length) {
     char *src = path + strlen(path) - 1;
 
-    while (!(*src == '/'
-#ifdef _WIN32
-             || *src == '\\'
-#endif
-             ) &&
-           src > path) {
+    while (!(*src == '/') && src > path) {
         if (*src == '.') {
             return;
         }

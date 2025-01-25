@@ -1,13 +1,8 @@
 .PHONY: all prep release debug clean format install
 
-# Platform detection
-ifeq ($(OS),Windows_NT)
-    mkdir = mkdir $(subst /,1p.\,$(1)) > nul 2>&1 || (exit 0)
-    rm = $(wordlist 2,65535,$(foreach FILE,$(subst /,\,$(1)),& del $(FILE) > nul 2>&1)) || (exit 0)
-else
-    mkdir = mkdir -p $(1)
-    rm = rm $(1) > /dev/null 2>&1 || true
-endif
+# Commands
+mkdir = mkdir -p $(1)
+rm = rm $(1) > /dev/null 2>&1 || true
 
 # Compiler flags
 CC = gcc
@@ -16,26 +11,16 @@ CFLAGS = -pedantic -std=c11 -Wall -Wextra
 # Project files
 SRCDIR = src
 
-ifeq ($(OS),Windows_NT)
-    # Windows build
-    EXE_EXT = .exe
-    EXCLUDED_SOURCES = $(SRCDIR)/os_unix.c
-else
-    # Unix build
-    EXE_EXT =
-    EXCLUDED_SOURCES = $(SRCDIR)/os_win32.c
-endif
-
-SOURCES = $(filter-out $(EXCLUDED_SOURCES), $(wildcard $(SRCDIR)/*.c))
+SOURCES = $(wildcard $(SRCDIR)/*.c)
 OBJS = $(patsubst $(SRCDIR)/%.c, %.o, $(SOURCES))
 DEPS = $(patsubst $(SRCDIR)/%.c, %.d, $(SOURCES))
-EXE = nino$(EXE_EXT)
+EXE = nino
 
 # Resources
 RESOURCE_DIR = resources
 SYNTAX_FILES= $(wildcard $(RESOURCE_DIR)/syntax/*.json)
 BUNDLER_SRC = $(RESOURCE_DIR)/bundler.c
-BUNDLER = $(RESOURCE_DIR)/bundler$(EXE_EXT)
+BUNDLER = $(RESOURCE_DIR)/bundler
 BUNDLE = $(RESOURCE_DIR)/bundle.h
 
 # Install settings

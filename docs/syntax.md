@@ -7,7 +7,6 @@ Enable syntax highlighting with command `syntax 1`.
 If you would like to make your own syntax files,
 you can put them in:
 - Linux: `~/.config/nino/syntax`
-- Windows: `~/.nino/syntax`
 
 ## Syntax Highlighting Data
 Syntax highlighting data are stored in JSON files.

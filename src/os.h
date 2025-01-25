@@ -44,12 +44,7 @@ void argsFree(Args args);
 #define NL_UNIX 0
 #define NL_DOS 1
 
-#ifdef _WIN32
-#define NL_DEFAULT NL_DOS
-#include "os_win32.h"
-#else
 #define NL_DEFAULT NL_UNIX
 #include "os_unix.h"
-#endif
 
 #endif

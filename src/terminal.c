@@ -15,55 +15,17 @@
 #include "os.h"
 #include "output.h"
 
-#ifdef _WIN32
-static HANDLE hStdin = INVALID_HANDLE_VALUE;
-static HANDLE hStdout = INVALID_HANDLE_VALUE;
-
-static DWORD orig_in_mode;
-static DWORD orig_out_mode;
-#else
 #include <sys/ioctl.h>
 #include <termios.h>
 
 static struct termios orig_termios;
-#endif
 
 static void disableRawMode(void) {
-#ifdef _WIN32
-    SetConsoleMode(hStdin, orig_in_mode);
-    SetConsoleMode(hStdout, orig_out_mode);
-#else
     if (tcsetattr(STDIN_FILENO, TCSAFLUSH, &orig_termios) == -1)
         PANIC("tcsetattr");
-#endif
 }
 
 static void enableRawMode(void) {
-#ifdef _WIN32
-    if (!SetConsoleCP(CP_UTF8))
-        PANIC("SetConsoleCP");
-
-    if (!SetConsoleOutputCP(CP_UTF8))
-        PANIC("SetConsoleOutputCP");
-
-    DWORD mode = 0;
-
-    if (!GetConsoleMode(hStdin, &mode))
-        PANIC("GetConsoleMode(hStdin)");
-    orig_in_mode = mode;
-    mode |= ENABLE_VIRTUAL_TERMINAL_INPUT;
-    mode &= ~(ENABLE_ECHO_INPUT | ENABLE_LINE_INPUT | ENABLE_PROCESSED_INPUT);
-    if (!SetConsoleMode(hStdin, mode))
-        PANIC("SetConsoleMode(hStdin)");
-
-    if (!GetConsoleMode(hStdout, &mode))
-        PANIC("GetConsoleMode(hStdout)");
-    orig_out_mode = mode;
-    mode |= ENABLE_PROCESSED_OUTPUT | ENABLE_VIRTUAL_TERMINAL_PROCESSING;
-    mode &= ~ENABLE_WRAP_AT_EOL_OUTPUT;
-    if (!SetConsoleMode(hStdout, mode))
-        PANIC("SetConsoleMode(hStdout)");
-#else
     if (tcgetattr(STDIN_FILENO, &orig_termios) == -1)
         PANIC("tcgetattr");
 
@@ -78,20 +40,10 @@ static void enableRawMode(void) {
 
     if (tcsetattr(STDIN_FILENO, TCSAFLUSH, &raw) == -1)
         PANIC("tcsetattr");
-#endif
 }
 
 // Reads a character from the console.
 static bool readConsole(uint32_t* unicode) {
-#ifdef _WIN32
-    WCHAR wbuf[1];
-    DWORD n = 0;
-    if (!ReadConsoleW(hStdin, wbuf, 1, &n, NULL) || !n) {
-        return false;
-    }
-    *unicode = (uint32_t)wbuf[0];
-    return true;
-#else
     // Decode UTF-8
 
     int bytes;
@@ -134,7 +86,6 @@ static bool readConsole(uint32_t* unicode) {
     }
 
     return true;
-#endif
 }
 
 typedef struct {
@@ -222,11 +173,6 @@ static const StrIntPair sequence_lookup[] = {
 EditorInput editorReadKey(void) {
     uint32_t c;
     EditorInput result = {.type = UNKNOWN};
-
-#ifdef _WIN32
-    // TODO: Detect window resize event
-    resizeWindow();
-#endif
 
     while (!readConsole(&c)) {
     }
@@ -320,18 +266,6 @@ EditorInput editorReadKey(void) {
     return result;
 }
 
-#ifdef _WIN32
-static int getWindowSize(int* rows, int* cols) {
-    CONSOLE_SCREEN_BUFFER_INFO csbi;
-
-    if (GetConsoleScreenBufferInfo(hStdout, &csbi)) {
-        *cols = csbi.srWindow.Right - csbi.srWindow.Left + 1;
-        *rows = csbi.srWindow.Bottom - csbi.srWindow.Top + 1;
-        return 0;
-    }
-    return -1;
-}
-#else
 static int getCursorPos(int* rows, int* cols) {
     char buf[32];
     size_t i = 0;
@@ -367,7 +301,6 @@ static int getWindowSize(int* rows, int* cols) {
         return 0;
     }
 }
-#endif
 
 static void SIGSEGV_handler(int sig) {
     if (sig != SIGSEGV)
@@ -405,14 +338,6 @@ void disableMouse(void) {
         gEditor.mouse_mode = false;
 }
 
-#ifndef _WIN32
-static void SIGWINCH_handler(int sig) {
-    if (sig != SIGWINCH)
-        return;
-    resizeWindow();
-}
-#endif
-
 void resizeWindow(void) {
     int rows = 0;
     int cols = 0;
@@ -432,15 +357,6 @@ void resizeWindow(void) {
 }
 
 void editorInitTerminal(void) {
-#ifdef _WIN32
-    hStdin = GetStdHandle(STD_INPUT_HANDLE);
-    if (hStdin == INVALID_HANDLE_VALUE)
-        PANIC("GetStdHandle(STD_INPUT_HANDLE)");
-    hStdout = GetStdHandle(STD_OUTPUT_HANDLE);
-    if (hStdout == INVALID_HANDLE_VALUE)
-        PANIC("GetStdHandle(STD_OUTPUT_HANDLE)");
-#endif
-
     enableRawMode();
     enableSwap();
     // Mouse mode default on
@@ -455,12 +371,6 @@ void editorInitTerminal(void) {
     if (signal(SIGABRT, SIGABRT_handler) == SIG_ERR) {
         PANIC("SIGABRT_handler");
     }
-
-#ifndef _WIN32
-    if (signal(SIGWINCH, SIGWINCH_handler) == SIG_ERR) {
-        PANIC("SIGWINCH_handler");
-    }
-#endif
 }
 
 void terminalExit(void) {
