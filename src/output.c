@@ -14,6 +14,7 @@
 #include "prompt.h"
 #include "select.h"
 #include "unicode.h"
+#include "version.h"
 
 static void editorDrawTopStatusBar(abuf* ab) {
     const char* right_buf = "  nino v" EDITOR_VERSION " ";

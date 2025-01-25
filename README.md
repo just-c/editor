@@ -25,44 +25,25 @@ I'm not used to [Vim](https://www.vim.org/) and I don't like [nano](https://nano
 
 ## Build
 
-This project uses CMake for building. Follow these steps to build the project:
-
 ### Prerequisites
 
-- CMake (minimum required version, e.g., 3.15)
-- A suitable C compiler (GCC, Clang, MSVC, etc.)
-
-### Cloning the Repository
-
-```bash
-git clone https://github.com/evanlin96069/nino.git
-cd nino
-```
-
-### Configuring the Build
-
-Create a build directory and run CMake to configure the project:
-
-```bash
-mkdir build
-cd build
-cmake ..
-```
+- gcc
+- gmake
 
 ### Building the Project
 
 To build the project, run:
 
 ```bash
-cmake --build .
+make
 ```
 
-### Optional: Installing the Project
+### Installing the Project
 
-If installation is necessary, you can install the project using:
+To install the project, run:
 
 ```bash
-cmake --install .
+make install
 ```
 
 ## Documentation

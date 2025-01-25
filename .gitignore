@@ -1,8 +1,11 @@
 # Codegen
 resources/bundle.h
+resources/bundler
 
 # Common build directories
 /build*/
+release/
+debug/
 
 # MacOS Finder files.
 .DS_Store
