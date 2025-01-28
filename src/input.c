@@ -15,204 +15,9 @@
 #include "unicode.h"
 #include "utils.h"
 
-static void editorExplorerNodeClicked(void) {
-    EditorExplorerNode* node = NULL;
-    EditorFile file = {0};
-
-    if (gEditor.explorer.selected_index < (int)gEditor.explorer.flatten.size)
-        node = gEditor.explorer.flatten.data[gEditor.explorer.selected_index];
-
-    if (!node)
-        return;
-    if (node->is_directory) {
-        node->is_open ^= 1;
-        editorExplorerRefresh();
-    } else if (editorOpen(&file, node->filename)) {
-        int index = editorAddFile(&file);
-        if (index == -1) {
-            editorFreeFile(&file);
-        }
-        // hack: refresh screen to update gEditor.tab_displayed
-        editorRefreshScreen();
-        editorChangeToFile(index);
-    }
-}
-
-static void editorExplorerScrollToSelect(void) {
-    if (gEditor.explorer.offset > gEditor.explorer.selected_index) {
-        gEditor.explorer.offset = gEditor.explorer.selected_index;
-    } else if ((int)gEditor.explorer.selected_index >=
-               gEditor.explorer.offset + gEditor.display_rows) {
-        gEditor.explorer.offset =
-            gEditor.explorer.selected_index - gEditor.display_rows + 1;
-    }
-
-    if (gEditor.explorer.offset < 0) {
-        gEditor.explorer.offset = 0;
-    }
-}
-
-static inline void editorExplorerShow(void) {
-    if (gEditor.explorer.width == 0) {
-        gEditor.explorer.width = gEditor.explorer.prefered_width
-                                     ? gEditor.explorer.prefered_width
-                                     : CONVAR_GETINT(ex_default_width);
-    }
-}
-
-static bool editorExplorerProcessKeypress(EditorInput input) {
-    if (input.type == CHAR_INPUT) {
-        if (!gEditor.explorer.node)
-            return true;
-
-        char c = tolower(input.data.unicode);
-        size_t index = gEditor.explorer.selected_index + 1;
-        for (size_t i = 0; i < gEditor.explorer.flatten.size; i++) {
-            index = index % gEditor.explorer.flatten.size;
-            if (tolower(getBaseName(
-                    gEditor.explorer.flatten.data[index]->filename)[0]) == c) {
-                gEditor.explorer.selected_index = index;
-                editorExplorerScrollToSelect();
-                break;
-            }
-            index++;
-        }
-        return true;
-    }
-
-    switch (input.type) {
-        case WHEEL_UP:
-            if (getMousePosField(input.data.cursor.x, input.data.cursor.y) !=
-                FIELD_EXPLORER)
-                return false;
-            if (gEditor.explorer.offset > 0) {
-                gEditor.explorer.offset = (gEditor.explorer.offset - 3) > 0
-                                              ? (gEditor.explorer.offset - 3)
-                                              : 0;
-            }
-            break;
-
-        case WHEEL_DOWN:
-            if (getMousePosField(input.data.cursor.x, input.data.cursor.y) !=
-                FIELD_EXPLORER)
-                return false;
-            if ((int)gEditor.explorer.flatten.size - gEditor.explorer.offset >
-                gEditor.display_rows) {
-                gEditor.explorer.offset += 3;
-            }
-            break;
-
-        case ARROW_UP:
-            if (gEditor.explorer.selected_index <= 0)
-                break;
-            gEditor.explorer.selected_index--;
-            editorExplorerScrollToSelect();
-            break;
-
-        case ARROW_DOWN:
-            if (gEditor.explorer.selected_index + 1 >=
-                (int)gEditor.explorer.flatten.size)
-                break;
-            gEditor.explorer.selected_index++;
-            editorExplorerScrollToSelect();
-            break;
-
-        case HOME_KEY:
-            gEditor.explorer.selected_index = 0;
-            editorExplorerScrollToSelect();
-            break;
-
-        case END_KEY:
-            gEditor.explorer.selected_index = gEditor.explorer.flatten.size - 1;
-            editorExplorerScrollToSelect();
-            break;
-
-        case PAGE_UP:
-            if (gEditor.explorer.selected_index != gEditor.explorer.offset) {
-                gEditor.explorer.selected_index = gEditor.explorer.offset;
-            } else {
-                gEditor.explorer.selected_index -= gEditor.display_rows;
-                if (gEditor.explorer.selected_index < 0) {
-                    gEditor.explorer.selected_index = 0;
-                }
-            }
-            editorExplorerScrollToSelect();
-            break;
-
-        case PAGE_DOWN:
-            if (gEditor.explorer.selected_index !=
-                gEditor.explorer.offset + gEditor.display_rows - 1) {
-                gEditor.explorer.selected_index =
-                    gEditor.explorer.offset + gEditor.display_rows - 1;
-            } else {
-                gEditor.explorer.selected_index += gEditor.display_rows;
-            }
-
-            if (gEditor.explorer.selected_index >=
-                (int)gEditor.explorer.flatten.size) {
-                gEditor.explorer.selected_index =
-                    gEditor.explorer.flatten.size - 1;
-            }
-            editorExplorerScrollToSelect();
-            break;
-
-        case '\r':
-            editorExplorerNodeClicked();
-            break;
-
-        case MOUSE_PRESSED:
-            if (getMousePosField(input.data.cursor.x, input.data.cursor.y) !=
-                FIELD_EXPLORER) {
-                gEditor.state = EDIT_MODE;
-                return false;
-            }
-
-            if (input.data.cursor.x == gEditor.explorer.width - 1) {
-                return false;
-            }
-
-            if (input.data.cursor.y == 0) {
-                gEditor.state = EXPLORER_MODE;
-                break;
-            }
-
-            if (input.data.cursor.y >
-                (int)gEditor.explorer.flatten.size - gEditor.explorer.offset)
-                break;
-            gEditor.explorer.selected_index =
-                input.data.cursor.y - 1 + gEditor.explorer.offset;
-            editorExplorerNodeClicked();
-            break;
-
-        case CTRL_KEY('q'):
-            if (gEditor.file_count == 0) {
-#ifdef _DEBUG
-                editorFree();
-#endif
-                exit(EXIT_SUCCESS);
-            }
-            return false;
-
-        case MOUSE_MOVE:
-        case SCROLL_RELEASED:
-        case CTRL_KEY('w'):
-        case CTRL_KEY('b'):
-        case CTRL_KEY('['):
-        case CTRL_KEY(']'):
-            return false;
-
-        case CTRL_KEY('e'):
-            if (gEditor.file_count != 0) {
-                gEditor.state = EDIT_MODE;
-            }
-            break;
-    }
-    return true;
-}
-
 void editorScrollToCursor(void) {
     int cols =
-        gEditor.screen_cols - gEditor.explorer.width - gCurFile->lineno_width;
+        gEditor.screen_cols - gCurFile->lineno_width;
     int rx = 0;
     if (gCurFile->cursor.y < gCurFile->num_rows) {
         rx = editorRowCxToRx(&gCurFile->row[gCurFile->cursor.y],
@@ -244,17 +49,14 @@ int getMousePosField(int x, int y) {
     if (y < 0 || y >= gEditor.screen_rows)
         return FIELD_ERROR;
     if (y == 0)
-        return x < gEditor.explorer.width ? FIELD_EXPLORER : FIELD_TOP_STATUS;
-    if (y == gEditor.screen_rows - 2 && gEditor.state != EDIT_MODE &&
-        gEditor.state != EXPLORER_MODE)
+        return FIELD_TOP_STATUS;
+    if (y == gEditor.screen_rows - 2 && gEditor.state != EDIT_MODE)
         return FIELD_PROMPT;
     if (y == gEditor.screen_rows - 1)
         return FIELD_STATUS;
-    if (x < gEditor.explorer.width)
-        return FIELD_EXPLORER;
     if (gEditor.file_count == 0)
         return FIELD_EMPTY;
-    if (x < gEditor.explorer.width + gCurFile->lineno_width)
+    if (x < gCurFile->lineno_width)
         return FIELD_LINENO;
     return FIELD_TEXT;
 }
@@ -272,8 +74,7 @@ void mousePosToEditorPos(int* x, int* y) {
         return;
     }
 
-    int col = *x - gEditor.explorer.width - gCurFile->lineno_width +
-              gCurFile->col_offset;
+    int col = *x - gCurFile->lineno_width + gCurFile->col_offset;
     if (col < 0) {
         col = 0;
     } else if (col > gCurFile->row[row].rsize) {
@@ -436,17 +237,10 @@ static int handleTabClick(int x) {
     if (gEditor.loading)
         return -1;
 
-    if (x < gEditor.explorer.width)
-        return -1;
-
     bool has_more_files = false;
     int tab_displayed = 0;
-    int len = gEditor.explorer.width;
+    int len = 0;
     if (gEditor.tab_offset != 0) {
-        if (x == gEditor.explorer.width) {
-            gEditor.tab_offset--;
-            return -1;
-        }
         len++;
     }
 
@@ -513,10 +307,6 @@ static void editorCloseFile(int index) {
     }
 
     editorRemoveFile(index);
-    if (gEditor.file_count == 0) {
-        gEditor.state = EXPLORER_MODE;
-        editorExplorerShow();
-    }
 
     if (index < gEditor.file_index ||
         (gEditor.file_index == index && index == gEditor.file_count)) {
@@ -533,7 +323,6 @@ void editorProcessKeypress(void) {
     static int mouse_click = 0;
     static int curr_x = 0;
     static int curr_y = 0;
-    static bool pressed_explorer = false;
 
     EditorInput input = editorReadKey();
 
@@ -551,16 +340,6 @@ void editorProcessKeypress(void) {
     }
 
     editorMsgClear();
-
-    if (gEditor.state == EXPLORER_MODE &&
-        editorExplorerProcessKeypress(input)) {
-        return;
-    }
-
-    if (gEditor.file_count == 0) {
-        gEditor.state = EXPLORER_MODE;
-        return;
-    }
 
     bool should_scroll = true;
 
@@ -651,24 +430,6 @@ void editorProcessKeypress(void) {
         case CTRL_KEY('n'):
             should_scroll = false;
             editorSave(gCurFile, 1);
-            break;
-
-        // Toggle explorer
-        case CTRL_KEY('b'):
-            should_scroll = false;
-            if (gEditor.explorer.width == 0) {
-                editorExplorerShow();
-            } else {
-                gEditor.explorer.width = 0;
-                gEditor.state = EDIT_MODE;
-            }
-            break;
-
-        // Focus explorer
-        case CTRL_KEY('e'):
-            should_scroll = false;
-            gEditor.state = EXPLORER_MODE;
-            editorExplorerShow();
             break;
 
         case HOME_KEY:
@@ -1175,13 +936,6 @@ void editorProcessKeypress(void) {
                 mouse_click = 0;
                 if (field == FIELD_TOP_STATUS) {
                     editorChangeToFile(handleTabClick(x));
-                } else if (field == FIELD_EXPLORER) {
-                    if (x == gEditor.explorer.width - 1) {
-                        pressed_explorer = true;
-                        break;
-                    }
-                    gEditor.state = EXPLORER_MODE;
-                    editorExplorerProcessKeypress(input);
                 }
                 break;
             }
@@ -1255,16 +1009,11 @@ void editorProcessKeypress(void) {
         case MOUSE_RELEASED:
             should_scroll = false;
             pressed = false;
-            pressed_explorer = false;
             break;
 
         case MOUSE_MOVE:
             should_scroll = false;
-            if (pressed_explorer) {
-                gEditor.explorer.width = gEditor.explorer.prefered_width = x;
-                if (x == 0)
-                    gEditor.state = EDIT_MODE;
-            } else if (moveMouse(x, y)) {
+            if (moveMouse(x, y)) {
                 curr_x = x;
                 curr_y = y;
             }
@@ -1278,8 +1027,6 @@ void editorProcessKeypress(void) {
                 if (field == FIELD_TOP_STATUS) {
                     if (gEditor.tab_offset > 0)
                         gEditor.tab_offset--;
-                } else if (field == FIELD_EXPLORER) {
-                    editorExplorerProcessKeypress(input);
                 }
                 break;
             }
@@ -1299,8 +1046,6 @@ void editorProcessKeypress(void) {
             if (field != FIELD_TEXT && field != FIELD_LINENO) {
                 if (field == FIELD_TOP_STATUS) {
                     handleTabClick(gEditor.screen_cols);
-                } else if (field == FIELD_EXPLORER) {
-                    editorExplorerProcessKeypress(input);
                 }
                 break;
             }

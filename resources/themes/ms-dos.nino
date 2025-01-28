@@ -5,11 +5,6 @@ color top.tabs.fg 000001
 color top.tabs.bg aaaaaa
 color top.select.fg ffffff
 color top.select.bg 000001
-color explorer.bg 0000aa
-color explorer.select 00aaaa
-color explorer.directory ffff55
-color explorer.file ffffff
-color explorer.focus 0000aa
 color prompt.fg 000001
 color prompt.bg aaaaaa
 color status.fg ffffff

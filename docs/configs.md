@@ -24,8 +24,6 @@ The command will first search for the file in the current directory, then the co
 | `helpinfo` | 1 | Show the help information. |
 | `ignorecase` | 2 | Use case insensitive search. Set to 2 to use smart case. |
 | `mouse` | 1 | Enable mouse mode. |
-| `ex_default_width` | 40 | File explorer default width. |
-| `ex_show_hidden` | 1 | Show hidden files in the file explorer. |
 | `osc52_copy` | 1 | Copy to system clipboard using OSC52. |
 | `color` | cmd | Change the color of an element. |
 | `exec` | cmd | Execute a config file. |
@@ -56,11 +54,6 @@ When color code is `000000` it will be transparent.
 | `top.tabs.bg` | `2d2d2d` |
 | `top.select.fg` | `e5e5e5` |
 | `top.select.bg` | `575068` |
-| `explorer.bg` | `252525` |
-| `explorer.select` | `575068` |
-| `explorer.directory` | `ecc184` |
-| `explorer.file` | `e5e5e5` |
-| `explorer.focus` | `2d2d2d` |
 | `prompt.fg` | `e5e5e5` |
 | `prompt.bg` | `3c3c3c` |
 | `status.fg` | `e1dbef` |

@@ -20,9 +20,9 @@ static void editorDrawTopStatusBar(abuf* ab) {
     const char* right_buf = "  nino v" EDITOR_VERSION " ";
     bool has_more_files = false;
     int rlen = strlen(right_buf);
-    int len = gEditor.explorer.width;
+    int len = 0;
 
-    gotoXY(ab, 1, gEditor.explorer.width + 1);
+    gotoXY(ab, 1, 1);
 
     setColor(ab, gEditor.color_cfg.top_status[0], 0);
     setColor(ab, gEditor.color_cfg.top_status[1], 1);
@@ -112,8 +112,7 @@ static void editorDrawConMsg(abuf* ab) {
     setColor(ab, gEditor.color_cfg.prompt[0], 0);
     setColor(ab, gEditor.color_cfg.prompt[1], 1);
 
-    bool should_draw_prompt =
-        (gEditor.state != EDIT_MODE && gEditor.state != EXPLORER_MODE);
+    bool should_draw_prompt = (gEditor.state != EDIT_MODE);
     int draw_x = gEditor.screen_rows - gEditor.con_size;
     if (should_draw_prompt) {
         draw_x--;
@@ -142,8 +141,7 @@ static void editorDrawConMsg(abuf* ab) {
 }
 
 static void editorDrawPrompt(abuf* ab) {
-    bool should_draw_prompt =
-        (gEditor.state != EDIT_MODE && gEditor.state != EXPLORER_MODE);
+    bool should_draw_prompt = (gEditor.state != EDIT_MODE);
     if (!should_draw_prompt) {
         return;
     }
@@ -262,7 +260,7 @@ static void editorDrawRows(abuf* ab) {
          i < gCurFile->row_offset + gEditor.display_rows; i++, s_row++) {
         bool is_row_full = false;
         // Move cursor to the beginning of a row
-        gotoXY(ab, s_row, 1 + gEditor.explorer.width);
+        gotoXY(ab, s_row, 1);
 
         gEditor.color_cfg.highlightBg[HL_BG_NORMAL] = gEditor.color_cfg.bg;
         if (i < gCurFile->num_rows) {
@@ -286,8 +284,7 @@ static void editorDrawRows(abuf* ab) {
             abufAppend(ab, ANSI_CLEAR);
             setColor(ab, gEditor.color_cfg.bg, 1);
 
-            int cols = gEditor.screen_cols - gEditor.explorer.width -
-                       gCurFile->lineno_width;
+            int cols = gEditor.screen_cols - gCurFile->lineno_width;
             int col_offset =
                 editorRowRxToCx(&gCurFile->row[i], gCurFile->col_offset);
             int len = gCurFile->row[i].size - col_offset;
@@ -397,66 +394,6 @@ static void editorDrawRows(abuf* ab) {
     }
 }
 
-static void editorDrawFileExplorer(abuf* ab) {
-    char* explorer_buf = malloc_s(gEditor.explorer.width + 1);
-    gotoXY(ab, 1, 1);
-
-    setColor(ab, gEditor.color_cfg.explorer[3], 0);
-    if (gEditor.state == EXPLORER_MODE)
-        setColor(ab, gEditor.color_cfg.explorer[4], 1);
-    else
-        setColor(ab, gEditor.color_cfg.explorer[0], 1);
-
-    snprintf(explorer_buf, gEditor.explorer.width + 1, " EXPLORER%*s",
-             gEditor.explorer.width, "");
-    abufAppendN(ab, explorer_buf, gEditor.explorer.width);
-
-    int lines = gEditor.explorer.flatten.size - gEditor.explorer.offset;
-    if (lines < 0) {
-        lines = 0;
-    } else if (lines > gEditor.display_rows) {
-        lines = gEditor.display_rows;
-    }
-
-    for (int i = 0; i < lines; i++) {
-        gotoXY(ab, i + 2, 1);
-
-        int index = gEditor.explorer.offset + i;
-        EditorExplorerNode* node = gEditor.explorer.flatten.data[index];
-        if (index == gEditor.explorer.selected_index)
-            setColor(ab, gEditor.color_cfg.explorer[1], 1);
-        else
-            setColor(ab, gEditor.color_cfg.explorer[0], 1);
-
-        const char* icon = "";
-        if (node->is_directory) {
-            setColor(ab, gEditor.color_cfg.explorer[2], 0);
-            icon = node->is_open ? "v " : "> ";
-        } else {
-            setColor(ab, gEditor.color_cfg.explorer[3], 0);
-        }
-        const char* filename = getBaseName(node->filename);
-
-        snprintf(explorer_buf, gEditor.explorer.width + 1, "%*s%s%s%*s",
-                 node->depth * 2, "", icon, filename, gEditor.explorer.width,
-                 "");
-        abufAppendN(ab, explorer_buf, gEditor.explorer.width);
-    }
-
-    // Draw blank lines
-    setColor(ab, gEditor.color_cfg.explorer[0], 1);
-    setColor(ab, gEditor.color_cfg.explorer[3], 0);
-
-    memset(explorer_buf, ' ', gEditor.explorer.width);
-
-    for (int i = 0; i < gEditor.display_rows - lines; i++) {
-        gotoXY(ab, lines + i + 2, 1);
-        abufAppendN(ab, explorer_buf, gEditor.explorer.width);
-    }
-
-    free(explorer_buf);
-}
-
 void editorRefreshScreen(void) {
     abuf ab = ABUF_INIT;
 
@@ -465,7 +402,6 @@ void editorRefreshScreen(void) {
 
     editorDrawTopStatusBar(&ab);
     editorDrawRows(&ab);
-    editorDrawFileExplorer(&ab);
 
     editorDrawConMsg(&ab);
     editorDrawPrompt(&ab);
@@ -480,19 +416,15 @@ void editorRefreshScreen(void) {
                    gCurFile->col_offset) +
                   1 + gCurFile->lineno_width;
         if (row <= 1 || row > gEditor.screen_rows - 1 || col <= 1 ||
-            col > gEditor.screen_cols - gEditor.explorer.width ||
+            col > gEditor.screen_cols ||
             row >= gEditor.screen_rows - gEditor.con_size) {
             should_show_cursor = false;
         } else {
-            gotoXY(&ab, row, col + gEditor.explorer.width);
+            gotoXY(&ab, row, col);
         }
     } else {
         // prompt
         gotoXY(&ab, gEditor.screen_rows - 1, gEditor.px + 1);
-    }
-
-    if (gEditor.state == EXPLORER_MODE) {
-        should_show_cursor = false;
     }
 
     if (should_show_cursor) {

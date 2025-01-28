@@ -90,9 +90,6 @@ typedef struct Editor {
     // Syntax highlight
     EditorSyntax* HLDB;
 
-    // File explorer
-    EditorExplorer explorer;
-
     // Console
     int con_front;
     int con_rear;

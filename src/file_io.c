@@ -50,27 +50,6 @@ static char* editroRowsToString(EditorFile* file, size_t* len) {
     return buf;
 }
 
-static void editorExplorerFreeNode(EditorExplorerNode* node) {
-    if (!node)
-        return;
-
-    if (node->is_directory) {
-        for (size_t i = 0; i < node->dir.count; i++) {
-            editorExplorerFreeNode(node->dir.nodes[i]);
-        }
-
-        for (size_t i = 0; i < node->file.count; i++) {
-            editorExplorerFreeNode(node->file.nodes[i]);
-        }
-
-        free(node->dir.nodes);
-        free(node->file.nodes);
-    }
-
-    free(node->filename);
-    free(node);
-}
-
 bool editorOpen(EditorFile* file, const char* path) {
     editorInitFile(file);
 
@@ -92,16 +71,7 @@ bool editorOpen(EditorFile* file, const char* path) {
         } break;
 
         case FT_DIR:
-            if (gEditor.explorer.node) {
-                editorExplorerFreeNode(gEditor.explorer.node);
-            }
             changeDir(path);
-            gEditor.explorer.node = editorExplorerCreate(".");
-            gEditor.explorer.node->is_open = true;
-            editorExplorerRefresh();
-
-            gEditor.explorer.offset = 0;
-            gEditor.explorer.selected_index = 0;
             return false;
 
         case FT_DEV:
@@ -269,108 +239,4 @@ void editorOpenFilePrompt(void) {
     }
 
     free(path);
-}
-
-static void insertExplorerNode(EditorExplorerNode* node,
-                               EditorExplorerNodeData* data) {
-    size_t i;
-    data->nodes =
-        realloc_s(data->nodes, (data->count + 1) * sizeof(EditorExplorerNode*));
-
-    for (i = 0; i < data->count; i++) {
-        if (strcmp(data->nodes[i]->filename, node->filename) > 0) {
-            memmove(&data->nodes[i + 1], &data->nodes[i],
-                    (data->count - i) * sizeof(EditorExplorerNode*));
-            break;
-        }
-    }
-
-    data->nodes[i] = node;
-    data->count++;
-}
-
-EditorExplorerNode* editorExplorerCreate(const char* path) {
-    EditorExplorerNode* node = malloc_s(sizeof(EditorExplorerNode));
-
-    int len = strlen(path);
-    node->filename = malloc_s(len + 1);
-    snprintf(node->filename, len + 1, "%s", path);
-
-    node->is_directory = (getFileType(path) == FT_DIR);
-    node->is_open = false;
-    node->loaded = false;
-    node->depth = 0;
-    node->dir.count = 0;
-    node->dir.nodes = NULL;
-    node->file.count = 0;
-    node->file.nodes = NULL;
-
-    return node;
-}
-
-void editorExplorerLoadNode(EditorExplorerNode* node) {
-    if (!node->is_directory)
-        return;
-
-    DirIter iter = dirFindFirst(node->filename);
-    if (iter.error)
-        return;
-
-    do {
-        const char* filename = dirGetName(&iter);
-        if (CONVAR_GETINT(ex_show_hidden) == 0 && filename[0] == '.')
-            continue;
-        if (strcmp(filename, ".") == 0 || strcmp(filename, "..") == 0)
-            continue;
-
-        char entry_path[EDITOR_PATH_MAX];
-        snprintf(entry_path, sizeof(entry_path), PATH_CAT("%s", "%s"),
-                 node->filename, filename);
-
-        EditorExplorerNode* child = editorExplorerCreate(entry_path);
-        if (!child)
-            continue;
-
-        child->depth = node->depth + 1;
-
-        if (child->is_directory) {
-            insertExplorerNode(child, &node->dir);
-        } else {
-            insertExplorerNode(child, &node->file);
-        }
-    } while (dirNext(&iter));
-    dirClose(&iter);
-
-    node->loaded = true;
-}
-
-static void flattenNode(EditorExplorerNode* node) {
-    if (node != gEditor.explorer.node)
-        vector_push(gEditor.explorer.flatten, node);
-
-    if (node->is_directory && node->is_open) {
-        if (!node->loaded)
-            editorExplorerLoadNode(node);
-
-        for (size_t i = 0; i < node->dir.count; i++) {
-            flattenNode(node->dir.nodes[i]);
-        }
-
-        for (size_t i = 0; i < node->file.count; i++) {
-            flattenNode(node->file.nodes[i]);
-        }
-    }
-}
-
-void editorExplorerRefresh(void) {
-    gEditor.explorer.flatten.size = 0;
-    gEditor.explorer.flatten.capacity = 0;
-    free(gEditor.explorer.flatten.data);
-    flattenNode(gEditor.explorer.node);
-    vector_shrink(gEditor.explorer.flatten);
-}
-
-void editorExplorerFree(void) {
-    editorExplorerFreeNode(gEditor.explorer.node);
-    free(gEditor.explorer.flatten.data);
 }

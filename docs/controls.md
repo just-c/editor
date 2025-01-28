@@ -12,8 +12,6 @@ The terminal emulator might have some key binds overlapping with nino, make sure
 | Save As | `Ctrl+N` |
 | Previous Tab | `Ctrl+[` |
 | Next Tab | `Ctrl+]` |
-| Focus Explorer | `Ctrl+e` |
-| Toggle Explorer | `Ctrl+b` |
 
 ## Prompt
 | Action | Keybinding |

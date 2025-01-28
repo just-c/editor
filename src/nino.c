@@ -31,21 +31,14 @@ int main(int argc, char* argv[]) {
     argsFree(cmd_args);
 
     if (gEditor.file_count == 0) {
-        if (gEditor.explorer.node) {
-            gEditor.state = EXPLORER_MODE;
-        } else {
-            editorAddFile(&file);
-            editorInsertRow(gCurFile, 0, "", 0);
-        }
+        editorAddFile(&file);
+        editorInsertRow(gCurFile, 0, "", 0);
     }
 
-    if (gEditor.explorer.node == NULL) {
-        gEditor.explorer.width = 0;
-    }
 
     gEditor.loading = false;
 
-    while (gEditor.file_count || gEditor.explorer.node) {
+    while (gEditor.file_count) {
         editorRefreshScreen();
         editorProcessKeypress();
     }

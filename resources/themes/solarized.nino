@@ -5,11 +5,6 @@ color top.tabs.fg 93a1a1
 color top.tabs.bg 003440
 color top.select.fg cccccc
 color top.select.bg 196e6c
-color explorer.bg 00212b
-color explorer.select 003440
-color explorer.directory ecc184
-color explorer.file cccccc
-color explorer.focus 1a343c
 color prompt.fg cccccc
 color prompt.bg 1a343c
 color status.fg 999999

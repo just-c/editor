@@ -15,7 +15,6 @@
 EditorConCmdArgs args;
 
 static void cvarSyntaxCallback(void);
-static void cvarExplorerCallback(void);
 static void cvarMouseCallback(void);
 
 CONVAR(tabsize, "Tab size.", "4", cvarSyntaxCallback);
@@ -34,10 +33,6 @@ CONVAR(osc52_copy, "Copy to system clipboard using OSC52.", "1", NULL);
 
 CONVAR(cmd_expand_depth, "Max depth for alias expansion.", "1024", NULL);
 
-CONVAR(ex_default_width, "File explorer default width.", "40", NULL);
-CONVAR(ex_show_hidden, "Show hidden files in the file explorer.", "1",
-       cvarExplorerCallback);
-
 static void reloadSyntax(void) {
     for (int i = 0; i < gEditor.file_count; i++) {
         for (int j = 0; j < gEditor.files[i].num_rows; j++) {
@@ -46,20 +41,7 @@ static void reloadSyntax(void) {
     }
 }
 
-static void reloadExplorer(void) {
-    if (gEditor.explorer.node) {
-        gEditor.explorer.node = editorExplorerCreate(".");
-        gEditor.explorer.node->is_open = true;
-        editorExplorerRefresh();
-
-        gEditor.explorer.offset = 0;
-        gEditor.explorer.selected_index = 0;
-    }
-}
-
 static void cvarSyntaxCallback(void) { reloadSyntax(); }
-
-static void cvarExplorerCallback(void) { reloadExplorer(); }
 
 static void cvarMouseCallback(void) {
     bool mode = CONVAR_GETINT(mouse);
@@ -81,12 +63,6 @@ const ColorElement color_element_map[EDITOR_COLOR_COUNT] = {
     {"top.tabs.bg", &gEditor.color_cfg.top_status[3]},
     {"top.select.fg", &gEditor.color_cfg.top_status[4]},
     {"top.select.bg", &gEditor.color_cfg.top_status[5]},
-
-    {"explorer.bg", &gEditor.color_cfg.explorer[0]},
-    {"explorer.select", &gEditor.color_cfg.explorer[1]},
-    {"explorer.directory", &gEditor.color_cfg.explorer[2]},
-    {"explorer.file", &gEditor.color_cfg.explorer[3]},
-    {"explorer.focus", &gEditor.color_cfg.explorer[4]},
 
     {"prompt.fg", &gEditor.color_cfg.prompt[0]},
     {"prompt.bg", &gEditor.color_cfg.prompt[1]},
@@ -374,14 +350,6 @@ const EditorColorScheme color_default = {
             {45, 45, 45},
             {229, 229, 229},
             {87, 80, 104},
-        },
-    .explorer =
-        {
-            {37, 37, 37},
-            {87, 80, 104},
-            {236, 193, 132},
-            {229, 229, 229},
-            {45, 45, 45},
         },
     .prompt =
         {
@@ -671,8 +639,6 @@ void editorInitConfig(void) {
     INIT_CONVAR(ignorecase);
     INIT_CONVAR(mouse);
     INIT_CONVAR(osc52_copy);
-    INIT_CONVAR(ex_default_width);
-    INIT_CONVAR(ex_show_hidden);
 
     INIT_CONCOMMAND(color);
     INIT_CONCOMMAND(lang);

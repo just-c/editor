@@ -58,7 +58,6 @@ enum EditorKey {
 
 enum EditorState {
     EDIT_MODE = 0,
-    EXPLORER_MODE,
     FIND_MODE,
     GOTO_LINE_MODE,
     OPEN_FILE_MODE,
@@ -99,7 +98,6 @@ enum EditorField {
     FIELD_LINENO,
     FIELD_PROMPT,
     FIELD_STATUS,
-    FIELD_EXPLORER,
     FIELD_ERROR,
 };
 

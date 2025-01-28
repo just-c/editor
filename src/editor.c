@@ -25,9 +25,6 @@ void editorInit(void) {
     editorInitConfig();
     editorInitHLDB();
 
-    gEditor.explorer.prefered_width = gEditor.explorer.width =
-        CONVAR_GETINT(ex_default_width);
-
     // Draw loading
     memset(&gEditor.files[0], 0, sizeof(EditorFile));
     gCurFile = &gEditor.files[0];
@@ -39,7 +36,6 @@ void editorFree(void) {
         editorFreeFile(&gEditor.files[i]);
     }
     editorFreeClipboardContent(&gEditor.clipboard);
-    editorExplorerFree();
     editorFreeHLDB();
     editorFreeConfig();
 }

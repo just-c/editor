@@ -20,8 +20,6 @@ extern EditorConCmd cvar_helpinfo;
 extern EditorConCmd cvar_ignorecase;
 extern EditorConCmd cvar_mouse;
 extern EditorConCmd cvar_osc52_copy;
-extern EditorConCmd cvar_ex_default_width;
-extern EditorConCmd cvar_ex_show_hidden;
 
 typedef struct EditorColorScheme EditorColorScheme;
 extern const EditorColorScheme color_default;
@@ -88,7 +86,6 @@ struct EditorConCmd {
 struct EditorColorScheme {
     Color bg;
     Color top_status[6];
-    Color explorer[5];
     Color prompt[2];
     Color status[6];
     Color line_number[2];
