@@ -14,10 +14,9 @@
 #include "prompt.h"
 #include "select.h"
 #include "unicode.h"
-#include "version.h"
 
 static void editorDrawTopStatusBar(abuf* ab) {
-    const char* right_buf = "  nino v" EDITOR_VERSION " ";
+    const char* right_buf = "  nino  ";
     bool has_more_files = false;
     int rlen = strlen(right_buf);
     int len = 0;
