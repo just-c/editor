@@ -10,7 +10,6 @@ CFLAGS = -pedantic -std=c11 -Wall -Wextra
 
 # Project files
 SRCDIR = src
-
 SOURCES = $(wildcard $(SRCDIR)/*.c)
 OBJS = $(patsubst $(SRCDIR)/%.c, %.o, $(SOURCES))
 DEPS = $(patsubst $(SRCDIR)/%.c, %.d, $(SOURCES))
@@ -30,19 +29,12 @@ bindir ?= $(exec_prefix)/bin
 
 INSTALL = install
 
-# Release build settings
+# Build settings
 RELDIR = release
-RELEXE = $(RELDIR)/$(EXE)
-RELOBJS = $(addprefix $(RELDIR)/, $(OBJS))
-RELDEPS = $(addprefix $(RELDIR)/, $(DEPS))
-RELCFLAGS = -O2 -DNDEBUG
-
-# Debug build settings
 DBGDIR = debug
+RELEXE = $(RELDIR)/$(EXE)
 DBGEXE = $(DBGDIR)/$(EXE)
-DBGOBJS = $(addprefix $(DBGDIR)/, $(OBJS))
-DBGDEPS = $(addprefix $(DBGDIR)/, $(DEPS))
-# -fsanitize=address,undefined
+RELCFLAGS = -O2 -DNDEBUG
 DBGCFLAGS = -Og -g3 -D_DEBUG
 
 # Default target
@@ -56,19 +48,19 @@ $(BUNDLE) : $(BUNDLER)
 
 # Release build
 release: $(RELEXE)
-$(RELEXE): $(RELOBJS)
-	$(CC) $(CFLAGS) $(RELCFLAGS) -s -o $(RELEXE) $^
+$(RELEXE): $(addprefix $(RELDIR)/, $(OBJS))
+	$(CC) $(CFLAGS) $(RELCFLAGS) -s -o $@ $^
 $(RELDIR)/%.o: $(SRCDIR)/%.c $(BUNDLE)
 	$(CC) -c -MMD $(CFLAGS) $(RELCFLAGS) -o $@ $<
 
 # Debug build
 debug: $(DBGEXE)
-$(DBGEXE): $(DBGOBJS)
-	$(CC) $(CFLAGS) $(DBGCFLAGS) -o $(DBGEXE) $^
+$(DBGEXE): $(addprefix $(DBGDIR)/, $(OBJS))
+	$(CC) $(CFLAGS) $(DBGCFLAGS) -o $@ $^
 $(DBGDIR)/%.o: $(SRCDIR)/%.c $(BUNDLE)
 	$(CC) -c -MMD $(CFLAGS) $(DBGCFLAGS) -o $@ $<
 
--include $(RELDEPS) $(DBGDEPS)
+-include $(addprefix $(RELDIR)/, $(DEPS)) $(addprefix $(DBGDIR)/, $(DEPS))
 
 # Prepare
 prep:
@@ -77,7 +69,7 @@ prep:
 
 # Clean target
 clean:
-	$(call rm, $(RELEXE) $(RELDEPS) $(RELOBJS) $(DBGEXE) $(DBGDEPS) $(DBGOBJS) $(BUNDLER) $(BUNDLE))
+	$(call rm, $(RELEXE) $(DBGEXE) $(addprefix $(RELDIR)/, $(OBJS) $(DEPS)) $(addprefix $(DBGDIR)/, $(OBJS) $(DEPS)) $(BUNDLER) $(BUNDLE))
 
 # Format all files
 format:
