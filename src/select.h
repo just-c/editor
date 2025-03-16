@@ -5,15 +5,15 @@
 #include <stddef.h>
 
 typedef struct EditorClipboard {
-    size_t size;
-    char** data;
+  size_t size;
+  char** data;
 } EditorClipboard;
 
 typedef struct EditorSelectRange {
-    int start_x;
-    int start_y;
-    int end_x;
-    int end_y;
+  int start_x;
+  int start_y;
+  int end_x;
+  int end_y;
 } EditorSelectRange;
 
 void getSelectStartEnd(EditorSelectRange* range);

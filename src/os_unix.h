@@ -20,16 +20,16 @@
 #endif
 
 struct FileInfo {
-    struct stat info;
+  struct stat info;
 
-    bool error;
+  bool error;
 };
 
 struct DirIter {
-    DIR* dp;
-    struct dirent* entry;
+  DIR* dp;
+  struct dirent* entry;
 
-    bool error;
+  bool error;
 };
 
 #endif

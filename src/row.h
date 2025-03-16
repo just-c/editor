@@ -9,11 +9,11 @@ struct EditorFile;
 typedef struct EditorFile EditorFile;
 
 typedef struct EditorRow {
-    int size;
-    int rsize;
-    char* data;
-    uint8_t* hl;
-    int hl_open_comment;
+  int size;
+  int rsize;
+  char* data;
+  uint8_t* hl;
+  int hl_open_comment;
 } EditorRow;
 
 void editorUpdateRow(EditorFile* file, EditorRow* row);

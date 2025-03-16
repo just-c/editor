@@ -4,14 +4,14 @@
 #include <stdint.h>
 
 typedef struct EditorInput {
-    int type;
-    union {
-        uint32_t unicode;
-        struct {
-            int x;
-            int y;
-        } cursor;
-    } data;
+  int type;
+  union {
+    uint32_t unicode;
+    struct {
+      int x;
+      int y;
+    } cursor;
+  } data;
 } EditorInput;
 
 void editorInitTerminal(void);

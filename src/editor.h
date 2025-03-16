@@ -21,84 +21,84 @@
 typedef struct EditorSyntax EditorSyntax;
 
 typedef struct EditorFile {
-    // Cursor position
-    EditorCursor cursor;
+  // Cursor position
+  EditorCursor cursor;
 
-    // Hidden cursor x position
-    int sx;
+  // Hidden cursor x position
+  int sx;
 
-    // bracket complete level
-    int bracket_autocomplete;
+  // bracket complete level
+  int bracket_autocomplete;
 
-    // Editor offsets
-    int row_offset;
-    int col_offset;
+  // Editor offsets
+  int row_offset;
+  int col_offset;
 
-    // Total line number
-    int num_rows;
-    int lineno_width;
+  // Total line number
+  int num_rows;
+  int lineno_width;
 
-    // File info
-    int dirty;
-    uint8_t newline;
-    char* filename;
-    FileInfo file_info;
+  // File info
+  int dirty;
+  uint8_t newline;
+  char* filename;
+  FileInfo file_info;
 
-    // Text buffers
-    EditorRow* row;
+  // Text buffers
+  EditorRow* row;
 
-    // Syntax highlight information
-    EditorSyntax* syntax;
+  // Syntax highlight information
+  EditorSyntax* syntax;
 
-    // Undo redo
-    EditorActionList* action_head;
-    EditorActionList* action_current;
+  // Undo redo
+  EditorActionList* action_head;
+  EditorActionList* action_current;
 } EditorFile;
 
 typedef struct Editor {
-    // Raw screen size
-    int screen_rows;
-    int screen_cols;
+  // Raw screen size
+  int screen_rows;
+  int screen_cols;
 
-    // Text field size
-    int display_rows;
+  // Text field size
+  int display_rows;
 
-    // Editor mode
-    bool loading;
-    int state;
-    bool mouse_mode;
+  // Editor mode
+  bool loading;
+  int state;
+  bool mouse_mode;
 
-    // Cursor position for prompt
-    int px;
+  // Cursor position for prompt
+  int px;
 
-    // Copy paste
-    EditorClipboard clipboard;
+  // Copy paste
+  EditorClipboard clipboard;
 
-    // Color settings
-    EditorColorScheme color_cfg;
+  // Color settings
+  EditorColorScheme color_cfg;
 
-    // ConCmd linked list
-    EditorConCmd* cvars;
+  // ConCmd linked list
+  EditorConCmd* cvars;
 
-    // Files
-    EditorFile files[EDITOR_FILE_MAX_SLOT];
-    int file_count;
-    int file_index;
-    int tab_offset;
-    int tab_displayed;
+  // Files
+  EditorFile files[EDITOR_FILE_MAX_SLOT];
+  int file_count;
+  int file_index;
+  int tab_offset;
+  int tab_displayed;
 
-    // Syntax highlight
-    EditorSyntax* HLDB;
+  // Syntax highlight
+  EditorSyntax* HLDB;
 
-    // Console
-    int con_front;
-    int con_rear;
-    int con_size;
-    char con_msg[EDITOR_CON_COUNT][EDITOR_CON_LENGTH];
+  // Console
+  int con_front;
+  int con_rear;
+  int con_size;
+  char con_msg[EDITOR_CON_COUNT][EDITOR_CON_LENGTH];
 
-    // Prompt
-    char prompt[EDITOR_PROMPT_LENGTH];
-    char prompt_right[EDITOR_RIGHT_PROMPT_LENGTH];
+  // Prompt
+  char prompt[EDITOR_PROMPT_LENGTH];
+  char prompt_right[EDITOR_RIGHT_PROMPT_LENGTH];
 } Editor;
 
 // Text editor

@@ -4,7 +4,7 @@
 #include <string.h>
 
 struct interval {
-    uint32_t start, end;
+  uint32_t start, end;
 };
 
 static const struct interval zero_width[] = {
@@ -171,112 +171,108 @@ static const struct interval double_width[] = {
 };
 
 static bool inTable(uint32_t ucs, const struct interval *table, int max) {
-    int min = 0;
-    if (ucs < table[0].start || ucs > table[max].end)
-        return false;
-    while (max >= min) {
-        int mid = (min + max) / 2;
-        if (ucs > table[mid].end)
-            min = mid + 1;
-        else if (ucs < table[mid].start)
-            max = mid - 1;
-        else
-            return true;
-    }
-    return false;
+  int min = 0;
+  if (ucs < table[0].start || ucs > table[max].end) return false;
+  while (max >= min) {
+    int mid = (min + max) / 2;
+    if (ucs > table[mid].end)
+      min = mid + 1;
+    else if (ucs < table[mid].start)
+      max = mid - 1;
+    else
+      return true;
+  }
+  return false;
 }
 
 int unicodeWidth(uint32_t ucs) {
-    if (ucs == 0)
-        return 0;
+  if (ucs == 0) return 0;
 
-    if (ucs < 32 || (ucs >= 0x7F && ucs < 0xA0))
-        return -1;
+  if (ucs < 32 || (ucs >= 0x7F && ucs < 0xA0)) return -1;
 
-    if (inTable(ucs, double_width,
-                sizeof(double_width) / sizeof(double_width[0]) - 1))
-        return 2;
-    if (inTable(ucs, zero_width,
-                sizeof(zero_width) / sizeof(zero_width[0]) - 1))
-        return 0;
-    return 1;
+  if (inTable(ucs, double_width,
+              sizeof(double_width) / sizeof(double_width[0]) - 1))
+    return 2;
+  if (inTable(ucs, zero_width, sizeof(zero_width) / sizeof(zero_width[0]) - 1))
+    return 0;
+  return 1;
 }
 
 int encodeUTF8(unsigned int code_point, char output[4]) {
-    if (code_point <= 0x7F) {
-        output[0] = (char)code_point;
-        return 1;
-    } else if (code_point <= 0x07FF) {
-        output[0] = 0xC0 | (code_point >> 6);
-        output[1] = 0x80 | (code_point & 0x3F);
-        return 2;
-    } else if (code_point <= 0xFFFF) {
-        output[0] = 0xE0 | (code_point >> 12);
-        output[1] = 0x80 | ((code_point >> 6) & 0x3F);
-        output[2] = 0x80 | (code_point & 0x3F);
-        return 3;
-    } else if (code_point <= 0x10FFFF) {
-        output[0] = 0xF0 | (code_point >> 18);
-        output[1] = 0x80 | ((code_point >> 12) & 0x3F);
-        output[2] = 0x80 | ((code_point >> 6) & 0x3F);
-        output[3] = 0x80 | (code_point & 0x3F);
-        return 4;
-    }
-    return -1;
+  if (code_point <= 0x7F) {
+    output[0] = (char)code_point;
+    return 1;
+  } else if (code_point <= 0x07FF) {
+    output[0] = 0xC0 | (code_point >> 6);
+    output[1] = 0x80 | (code_point & 0x3F);
+    return 2;
+  } else if (code_point <= 0xFFFF) {
+    output[0] = 0xE0 | (code_point >> 12);
+    output[1] = 0x80 | ((code_point >> 6) & 0x3F);
+    output[2] = 0x80 | (code_point & 0x3F);
+    return 3;
+  } else if (code_point <= 0x10FFFF) {
+    output[0] = 0xF0 | (code_point >> 18);
+    output[1] = 0x80 | ((code_point >> 12) & 0x3F);
+    output[2] = 0x80 | ((code_point >> 6) & 0x3F);
+    output[3] = 0x80 | (code_point & 0x3F);
+    return 4;
+  }
+  return -1;
 }
 
 uint32_t decodeUTF8(const char *str, size_t len, size_t *byte_size) {
-    if (len == 0) {
-        *byte_size = 0;
-        return 0xFFFD;
-    }
+  if (len == 0) {
+    *byte_size = 0;
+    return 0xFFFD;
+  }
 
-    uint8_t first_byte = str[0];
-    uint32_t result;
-    size_t bytes;
+  uint8_t first_byte = str[0];
+  uint32_t result;
+  size_t bytes;
 
-    if ((first_byte & 0x80) == 0x00) {
-        *byte_size = 1;
-        return (uint32_t)first_byte;
-    }
+  if ((first_byte & 0x80) == 0x00) {
+    *byte_size = 1;
+    return (uint32_t)first_byte;
+  }
 
-    if ((first_byte & 0xE0) == 0xC0) {
-        result = (first_byte & 0x1F) << 6;
-        bytes = 2;
-    } else if ((first_byte & 0xF0) == 0xE0) {
-        result = (first_byte & 0x0F) << 12;
-        bytes = 3;
-    } else if ((first_byte & 0xF8) == 0xF0) {
-        result = (first_byte & 0x07) << 18;
-        bytes = 4;
-    } else {
-        *byte_size = 1;
-        return 0xFFFD;
-    }
+  if ((first_byte & 0xE0) == 0xC0) {
+    result = (first_byte & 0x1F) << 6;
+    bytes = 2;
+  } else if ((first_byte & 0xF0) == 0xE0) {
+    result = (first_byte & 0x0F) << 12;
+    bytes = 3;
+  } else if ((first_byte & 0xF8) == 0xF0) {
+    result = (first_byte & 0x07) << 18;
+    bytes = 4;
+  } else {
+    *byte_size = 1;
+    return 0xFFFD;
+  }
 
-    int shift = (bytes - 2) * 6;
-    for (size_t i = 1; i < bytes; i++) {
-        if (i >= len || (str[i] & 0xC0) != 0x80) {
-            *byte_size = i;
-            return 0xFFFD;
-        }
-        result |= (str[i] & 0x3F) << shift;
-        shift -= 6;
+  int shift = (bytes - 2) * 6;
+  for (size_t i = 1; i < bytes; i++) {
+    if (i >= len || (str[i] & 0xC0) != 0x80) {
+      *byte_size = i;
+      return 0xFFFD;
     }
-    *byte_size = bytes;
-    return result;
+    result |= (str[i] & 0x3F) << shift;
+    shift -= 6;
+  }
+  *byte_size = bytes;
+  return result;
 }
 
 int strUTF8Width(const char *str) {
-    const char *p = str;
-    int width = 0;
-    size_t len = strlen(str);
+  const char *p = str;
+  int width = 0;
+  size_t len = strlen(str);
 
-    while (*p != '\0') {
-        size_t byte_size;
-        width += unicodeWidth(decodeUTF8(p, len, &byte_size));
-        p += byte_size;
-        len -= byte_size;
-    }
-    return width;
+  while (*p != '\0') {
+    size_t byte_size;
+    width += unicodeWidth(decodeUTF8(p, len, &byte_size));
+    p += byte_size;
+    len -= byte_size;
+  }
+  return width;
 }

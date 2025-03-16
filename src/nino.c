@@ -9,39 +9,38 @@
 #include "row.h"
 
 int main(int argc, char* argv[]) {
-    editorInit();
-    EditorFile file;
-    editorInitFile(&file);
+  editorInit();
+  EditorFile file;
+  editorInitFile(&file);
 
-    Args cmd_args = argsGet(argc, argv);
+  Args cmd_args = argsGet(argc, argv);
 
-    if (cmd_args.count > 1) {
-        for (int i = 1; i < cmd_args.count; i++) {
-            if (gEditor.file_count >= EDITOR_FILE_MAX_SLOT) {
-                editorMsg("Already opened too many files!");
-                break;
-            }
-            editorInitFile(&file);
-            if (editorOpen(&file, cmd_args.args[i])) {
-                editorAddFile(&file);
-            }
-        }
-    }
-
-    argsFree(cmd_args);
-
-    if (gEditor.file_count == 0) {
+  if (cmd_args.count > 1) {
+    for (int i = 1; i < cmd_args.count; i++) {
+      if (gEditor.file_count >= EDITOR_FILE_MAX_SLOT) {
+        editorMsg("Already opened too many files!");
+        break;
+      }
+      editorInitFile(&file);
+      if (editorOpen(&file, cmd_args.args[i])) {
         editorAddFile(&file);
-        editorInsertRow(gCurFile, 0, "", 0);
+      }
     }
+  }
 
+  argsFree(cmd_args);
 
-    gEditor.loading = false;
+  if (gEditor.file_count == 0) {
+    editorAddFile(&file);
+    editorInsertRow(gCurFile, 0, "", 0);
+  }
 
-    while (gEditor.file_count) {
-        editorRefreshScreen();
-        editorProcessKeypress();
-    }
-    editorFree();
-    return 0;
+  gEditor.loading = false;
+
+  while (gEditor.file_count) {
+    editorRefreshScreen();
+    editorProcessKeypress();
+  }
+  editorFree();
+  return 0;
 }

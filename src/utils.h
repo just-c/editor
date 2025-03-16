@@ -8,8 +8,8 @@
 // Macros
 #define _DO02(m, sep, x, y) m(x) sep m(y)
 #define _DO03(m, sep, x, y, z) \
-    m(x) sep m(y)              \
-    sep m(z)
+  m(x) sep m(y)                \
+  sep m(z)
 
 #define _DO_N(x01, x02, x03, N, ...) _DO##N
 #define _MAP(m, sep, ...) _DO_N(__VA_ARGS__, 03, 02, 01)(m, sep, __VA_ARGS__)
@@ -46,43 +46,42 @@ void* _realloc_s(const char* file, int line, void* ptr, size_t size);
 #define VECTOR_MIN_CAPACITY 16
 #define VECTOR_EXTEND_RATE 1.5
 
-#define VECTOR(type)     \
-    struct {             \
-        size_t size;     \
-        size_t capacity; \
-        type* data;      \
-    }
+#define VECTOR(type) \
+  struct {           \
+    size_t size;     \
+    size_t capacity; \
+    type* data;      \
+  }
 
 typedef struct {
-    size_t size;
-    size_t capacity;
-    void* data;
+  size_t size;
+  size_t capacity;
+  void* data;
 } _Vector;
 
 void _vector_make_room(_Vector* _vec, size_t item_size);
 
-#define vector_push(vec, val)                             \
-    do {                                                  \
-        _vector_make_room((_Vector*)&(vec), sizeof(val)); \
-        (vec).data[(vec).size++] = (val);                 \
-    } while (0)
+#define vector_push(vec, val)                         \
+  do {                                                \
+    _vector_make_room((_Vector*)&(vec), sizeof(val)); \
+    (vec).data[(vec).size++] = (val);                 \
+  } while (0)
 
 #define vector_pop(vec) ((vec).data[--(vec).size])
 
-#define vector_shrink(vec)                                              \
-    do {                                                                \
-        (vec).data = realloc_s(vec.data, sizeof(*vec.data) * vec.size); \
-    } while (0)
+#define vector_shrink(vec)                                          \
+  do {                                                              \
+    (vec).data = realloc_s(vec.data, sizeof(*vec.data) * vec.size); \
+  } while (0)
 
 // Abuf
 #define ABUF_GROWTH_RATE 1.5f
-#define ABUF_INIT \
-    { NULL, 0, 0 }
+#define ABUF_INIT {NULL, 0, 0}
 
 typedef struct {
-    char* buf;
-    size_t len;
-    size_t capacity;
+  char* buf;
+  size_t len;
+  size_t capacity;
 } abuf;
 
 void abufAppend(abuf* ab, const char* s);
@@ -91,7 +90,7 @@ void abufFree(abuf* ab);
 
 // Color
 typedef struct Color {
-    int r, g, b;
+  int r, g, b;
 } Color;
 
 Color strToColor(const char* color);
