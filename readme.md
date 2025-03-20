@@ -1,4 +1,4 @@
-# nino
+# a nino fork
 
 A small terminal-based text editor written in C.
 
