@@ -1,81 +1,48 @@
-.PHONY: all prep release debug clean format install
+.PHONY: all clean install
 
-# Commands
-mkdir = mkdir -p $(1)
-rm = rm $(1) > /dev/null 2>&1 || true
+# Compiler and flags
+COMPILER = gcc
+COMPILER_FLAGS = -pedantic -std=c11 -Wall -Wextra
+RELEASE_FLAGS = -O2 -DNDEBUG
+DEBUG_FLAGS = -Og -g3 -D_DEBUG
 
-# Compiler flags
-CC = gcc
-CFLAGS = -pedantic -std=c11 -Wall -Wextra
-
-# Project files
-SRCDIR = src
-SOURCES = $(wildcard $(SRCDIR)/*.c)
-OBJS = $(patsubst $(SRCDIR)/%.c, %.o, $(SOURCES))
-DEPS = $(patsubst $(SRCDIR)/%.c, %.d, $(SOURCES))
-EXE = nino
-
-# Resources
-RESOURCE_DIR = resources
-SYNTAX_FILES= $(wildcard $(RESOURCE_DIR)/syntax/*.json)
-BUNDLER_SRC = $(RESOURCE_DIR)/bundler.c
-BUNDLER = $(RESOURCE_DIR)/bundler
-BUNDLE = $(RESOURCE_DIR)/bundle.h
-
-# Install settings
-prefix ?= /usr/local
-exec_prefix ?= $(prefix)
-bindir ?= $(exec_prefix)/bin
-
-INSTALL = install
-
-# Build settings
-RELDIR = release
-DBGDIR = debug
-RELEXE = $(RELDIR)/$(EXE)
-DBGEXE = $(DBGDIR)/$(EXE)
-RELCFLAGS = -O2 -DNDEBUG
-DBGCFLAGS = -Og -g3 -D_DEBUG
+# Directories and files
+SOURCE_FILES = $(wildcard src/*.c)
+OBJECT_FILES = $(SOURCE_FILES:src/%.c=%.o)
+SYNTAX_FILES = $(wildcard resources/syntax/*.json)
 
 # Default target
-all: prep release
-
-$(BUNDLER) : $(BUNDLER_SRC)
-	$(CC) -s -o $@ $<
-
-$(BUNDLE) : $(BUNDLER)
-	$(BUNDLER) $(BUNDLE) $(SYNTAX_FILES)
+all: release/nino
 
 # Release build
-release: $(RELEXE)
-$(RELEXE): $(addprefix $(RELDIR)/, $(OBJS))
-	$(CC) $(CFLAGS) $(RELCFLAGS) -s -o $@ $^
-$(RELDIR)/%.o: $(SRCDIR)/%.c $(BUNDLE)
-	$(CC) -c -MMD $(CFLAGS) $(RELCFLAGS) -o $@ $<
+release/nino: resources/bundle.h $(addprefix release/, $(OBJECT_FILES))
+	$(COMPILER) $(COMPILER_FLAGS) $(RELEASE_FLAGS) -o $@ $^
+
+release/%.o: src/%.c
+	mkdir -p release
+	$(COMPILER) -c $(COMPILER_FLAGS) $(RELEASE_FLAGS) -o $@ $<
 
 # Debug build
-debug: $(DBGEXE)
-$(DBGEXE): $(addprefix $(DBGDIR)/, $(OBJS))
-	$(CC) $(CFLAGS) $(DBGCFLAGS) -o $@ $^
-$(DBGDIR)/%.o: $(SRCDIR)/%.c $(BUNDLE)
-	$(CC) -c -MMD $(CFLAGS) $(DBGCFLAGS) -o $@ $<
+debug: debug/nino
 
--include $(addprefix $(RELDIR)/, $(DEPS)) $(addprefix $(DBGDIR)/, $(DEPS))
+debug/nino: resources/bundle.h $(addprefix debug/, $(OBJECT_FILES))
+	$(COMPILER) $(COMPILER_FLAGS) $(DEBUG_FLAGS) -o $@ $^
 
-# Prepare
-prep:
-	@$(call mkdir, $(RELDIR))
-	@$(call mkdir, $(DBGDIR))
+debug/%.o: src/%.c
+	mkdir -p debug
+	$(COMPILER) -c $(COMPILER_FLAGS) $(DEBUG_FLAGS) -o $@ $<
+
+# Bundle generation
+resources/bundle.h: resources/bundler
+	resources/bundler resources/bundle.h $(SYNTAX_FILES)
+
+resources/bundler: resources/bundler.c
+	$(COMPILER) -o $@ $<
 
 # Clean target
 clean:
-	$(call rm, $(RELEXE) $(DBGEXE) $(addprefix $(RELDIR)/, $(OBJS) $(DEPS)) $(addprefix $(DBGDIR)/, $(OBJS) $(DEPS)) $(BUNDLER) $(BUNDLE))
-
-# Format all files
-format:
-	clang-format -i $(SRCDIR)/*.h $(SRCDIR)/*.c
+	rm -rf release debug resources/bundler resources/bundle.h
 
 # Install target
-install:
-	$(INSTALL) $(RELEXE) $(DESTDIR)$(bindir)/$(EXE)
-
+install: release/nino
+	install -D release/nino /usr/local/bin/nino
