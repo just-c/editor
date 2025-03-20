@@ -10,32 +10,32 @@
 #include "terminal.h"
 #include "utils.h"
 
-Editor gEditor;
+Editor editor;
 EditorFile* gCurFile;
 
 void editorInit(void) {
-  memset(&gEditor, 0, sizeof(Editor));
-  gEditor.loading = true;
-  gEditor.state = EDIT_MODE;
-  gEditor.color_cfg = color_default;
+  memset(&editor, 0, sizeof(Editor));
+  editor.loading = true;
+  editor.state = EDIT_MODE;
+  editor.color_cfg = color_default;
 
-  gEditor.con_front = -1;
+  editor.con_front = -1;
 
   editorInitTerminal();
   editorInitConfig();
   editorInitHLDB();
 
   // Draw loading
-  memset(&gEditor.files[0], 0, sizeof(EditorFile));
-  gCurFile = &gEditor.files[0];
+  memset(&editor.files[0], 0, sizeof(EditorFile));
+  gCurFile = &editor.files[0];
   editorRefreshScreen();
 }
 
 void editorFree(void) {
-  for (int i = 0; i < gEditor.file_count; i++) {
-    editorFreeFile(&gEditor.files[i]);
+  for (int i = 0; i < editor.file_count; i++) {
+    editorFreeFile(&editor.files[i]);
   }
-  editorFreeClipboardContent(&gEditor.clipboard);
+  editorFreeClipboardContent(&editor.clipboard);
   editorFreeHLDB();
   editorFreeConfig();
 }
@@ -55,43 +55,43 @@ void editorFreeFile(EditorFile* file) {
 }
 
 int editorAddFile(EditorFile* file) {
-  if (gEditor.file_count >= EDITOR_FILE_MAX_SLOT) {
+  if (editor.file_count >= EDITOR_FILE_MAX_SLOT) {
     editorMsg("Already opened too many files!");
     return -1;
   }
 
-  EditorFile* current = &gEditor.files[gEditor.file_count];
+  EditorFile* current = &editor.files[editor.file_count];
 
   *current = *file;
   current->action_head = calloc_s(1, sizeof(EditorActionList));
   current->action_current = current->action_head;
 
-  gEditor.file_count++;
-  return gEditor.file_count - 1;
+  editor.file_count++;
+  return editor.file_count - 1;
 }
 
 void editorRemoveFile(int index) {
-  if (index < 0 || index > gEditor.file_count) return;
+  if (index < 0 || index > editor.file_count) return;
 
-  EditorFile* file = &gEditor.files[index];
+  EditorFile* file = &editor.files[index];
   editorFreeFile(file);
-  if (file == &gEditor.files[gEditor.file_count]) {
+  if (file == &editor.files[editor.file_count]) {
     // file is at the end
-    gEditor.file_count--;
+    editor.file_count--;
     return;
   }
-  memmove(file, &gEditor.files[index + 1],
-          sizeof(EditorFile) * (gEditor.file_count - index));
-  gEditor.file_count--;
+  memmove(file, &editor.files[index + 1],
+          sizeof(EditorFile) * (editor.file_count - index));
+  editor.file_count--;
 }
 
 void editorChangeToFile(int index) {
-  if (index < 0 || index >= gEditor.file_count) return;
-  gEditor.file_index = index;
-  gCurFile = &gEditor.files[index];
+  if (index < 0 || index >= editor.file_count) return;
+  editor.file_index = index;
+  gCurFile = &editor.files[index];
 
-  if (gEditor.tab_offset > index ||
-      gEditor.tab_offset + gEditor.tab_displayed <= index) {
-    gEditor.tab_offset = index;
+  if (editor.tab_offset > index ||
+      editor.tab_offset + editor.tab_displayed <= index) {
+    editor.tab_offset = index;
   }
 }

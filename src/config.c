@@ -34,9 +34,9 @@ CONVAR(osc52_copy, "Copy to system clipboard using OSC52.", "1", NULL);
 CONVAR(cmd_expand_depth, "Max depth for alias expansion.", "1024", NULL);
 
 static void reloadSyntax(void) {
-  for (int i = 0; i < gEditor.file_count; i++) {
-    for (int j = 0; j < gEditor.files[i].num_rows; j++) {
-      editorUpdateRow(&gEditor.files[i], &gEditor.files[i].row[j]);
+  for (int i = 0; i < editor.file_count; i++) {
+    for (int j = 0; j < editor.files[i].num_rows; j++) {
+      editorUpdateRow(&editor.files[i], &editor.files[i].row[j]);
     }
   }
 }
@@ -45,7 +45,7 @@ static void cvarSyntaxCallback(void) { reloadSyntax(); }
 
 static void cvarMouseCallback(void) {
   bool mode = CONVAR_GETINT(mouse);
-  if (gEditor.mouse_mode != mode) {
+  if (editor.mouse_mode != mode) {
     if (mode) {
       enableMouse();
     } else {
@@ -55,42 +55,42 @@ static void cvarMouseCallback(void) {
 }
 
 const ColorElement color_element_map[EDITOR_COLOR_COUNT] = {
-    {"bg", &gEditor.color_cfg.bg},
+    {"bg", &editor.color_cfg.bg},
 
-    {"top.fg", &gEditor.color_cfg.top_status[0]},
-    {"top.bg", &gEditor.color_cfg.top_status[1]},
-    {"top.tabs.fg", &gEditor.color_cfg.top_status[2]},
-    {"top.tabs.bg", &gEditor.color_cfg.top_status[3]},
-    {"top.select.fg", &gEditor.color_cfg.top_status[4]},
-    {"top.select.bg", &gEditor.color_cfg.top_status[5]},
+    {"top.fg", &editor.color_cfg.top_status[0]},
+    {"top.bg", &editor.color_cfg.top_status[1]},
+    {"top.tabs.fg", &editor.color_cfg.top_status[2]},
+    {"top.tabs.bg", &editor.color_cfg.top_status[3]},
+    {"top.select.fg", &editor.color_cfg.top_status[4]},
+    {"top.select.bg", &editor.color_cfg.top_status[5]},
 
-    {"prompt.fg", &gEditor.color_cfg.prompt[0]},
-    {"prompt.bg", &gEditor.color_cfg.prompt[1]},
+    {"prompt.fg", &editor.color_cfg.prompt[0]},
+    {"prompt.bg", &editor.color_cfg.prompt[1]},
 
     // TODO: Customizable status bar
-    {"status.fg", &gEditor.color_cfg.status[0]},
-    {"status.bg", &gEditor.color_cfg.status[1]},
-    {"status.lang.fg", &gEditor.color_cfg.status[2]},
-    {"status.lang.bg", &gEditor.color_cfg.status[3]},
-    {"status.pos.fg", &gEditor.color_cfg.status[4]},
-    {"status.pos.bg", &gEditor.color_cfg.status[5]},
+    {"status.fg", &editor.color_cfg.status[0]},
+    {"status.bg", &editor.color_cfg.status[1]},
+    {"status.lang.fg", &editor.color_cfg.status[2]},
+    {"status.lang.bg", &editor.color_cfg.status[3]},
+    {"status.pos.fg", &editor.color_cfg.status[4]},
+    {"status.pos.bg", &editor.color_cfg.status[5]},
 
-    {"lineno.fg", &gEditor.color_cfg.line_number[0]},
-    {"lineno.bg", &gEditor.color_cfg.line_number[1]},
+    {"lineno.fg", &editor.color_cfg.line_number[0]},
+    {"lineno.bg", &editor.color_cfg.line_number[1]},
 
-    {"cursorline", &gEditor.color_cfg.cursor_line},
+    {"cursorline", &editor.color_cfg.cursor_line},
 
-    {"hl.normal", &gEditor.color_cfg.highlightFg[HL_NORMAL]},
-    {"hl.comment", &gEditor.color_cfg.highlightFg[HL_COMMENT]},
-    {"hl.keyword1", &gEditor.color_cfg.highlightFg[HL_KEYWORD1]},
-    {"hl.keyword2", &gEditor.color_cfg.highlightFg[HL_KEYWORD2]},
-    {"hl.keyword3", &gEditor.color_cfg.highlightFg[HL_KEYWORD3]},
-    {"hl.string", &gEditor.color_cfg.highlightFg[HL_STRING]},
-    {"hl.number", &gEditor.color_cfg.highlightFg[HL_NUMBER]},
-    {"hl.space", &gEditor.color_cfg.highlightFg[HL_SPACE]},
-    {"hl.match", &gEditor.color_cfg.highlightBg[HL_BG_MATCH]},
-    {"hl.select", &gEditor.color_cfg.highlightBg[HL_BG_SELECT]},
-    {"hl.trailing", &gEditor.color_cfg.highlightBg[HL_BG_TRAILING]},
+    {"hl.normal", &editor.color_cfg.highlightFg[HL_NORMAL]},
+    {"hl.comment", &editor.color_cfg.highlightFg[HL_COMMENT]},
+    {"hl.keyword1", &editor.color_cfg.highlightFg[HL_KEYWORD1]},
+    {"hl.keyword2", &editor.color_cfg.highlightFg[HL_KEYWORD2]},
+    {"hl.keyword3", &editor.color_cfg.highlightFg[HL_KEYWORD3]},
+    {"hl.string", &editor.color_cfg.highlightFg[HL_STRING]},
+    {"hl.number", &editor.color_cfg.highlightFg[HL_NUMBER]},
+    {"hl.space", &editor.color_cfg.highlightFg[HL_SPACE]},
+    {"hl.match", &editor.color_cfg.highlightBg[HL_BG_MATCH]},
+    {"hl.select", &editor.color_cfg.highlightBg[HL_BG_SELECT]},
+    {"hl.trailing", &editor.color_cfg.highlightBg[HL_BG_TRAILING]},
 };
 
 CON_COMMAND(color, "Change the color of an element.") {
@@ -151,13 +151,13 @@ CON_COMMAND(lang, "Set the syntax highlighting language of the current file.") {
     return;
   }
 
-  if (gEditor.file_count == 0) {
+  if (editor.file_count == 0) {
     editorMsg("lang: No file opened");
     return;
   }
 
   const char* name = args.argv[1];
-  for (EditorSyntax* s = gEditor.HLDB; s; s = s->next) {
+  for (EditorSyntax* s = editor.HLDB; s; s = s->next) {
     // Match the language name or the externaion
     if (strCaseCmp(name, s->file_type) == 0) {
       editorSetSyntaxHighlight(gCurFile, s);
@@ -307,7 +307,7 @@ CON_COMMAND(
 
   const char* s = args.argv[1];
 
-  EditorConCmd* curr = gEditor.cvars;
+  EditorConCmd* curr = editor.cvars;
   while (curr) {
     if (strCaseStr(curr->name, s) || strCaseStr(curr->help_string, s)) {
       showCmdHelp(curr);
@@ -699,8 +699,8 @@ void editorSetConVar(EditorConVar* thisptr, const char* string_val) {
 }
 
 static inline void registerConCmd(EditorConCmd* thisptr) {
-  thisptr->next = gEditor.cvars;
-  gEditor.cvars = thisptr;
+  thisptr->next = editor.cvars;
+  editor.cvars = thisptr;
 }
 
 void editorInitConCmd(EditorConCmd* thisptr) {
@@ -719,7 +719,7 @@ void editorInitConVar(EditorConCmd* thisptr) {
 
 EditorConCmd* editorFindCmd(const char* name) {
   EditorConCmd* result = NULL;
-  EditorConCmd* curr = gEditor.cvars;
+  EditorConCmd* curr = editor.cvars;
   while (curr) {
     if (strCaseCmp(name, curr->name) == 0) {
       result = curr;

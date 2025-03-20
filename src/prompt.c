@@ -15,37 +15,37 @@
 void editorMsg(const char* fmt, ...) {
   va_list ap;
   va_start(ap, fmt);
-  vsnprintf(gEditor.con_msg[gEditor.con_rear], sizeof(gEditor.con_msg[0]), fmt,
+  vsnprintf(editor.con_msg[editor.con_rear], sizeof(editor.con_msg[0]), fmt,
             ap);
   va_end(ap);
 
-  if (gEditor.con_front == gEditor.con_rear) {
-    gEditor.con_front = (gEditor.con_front + 1) % EDITOR_CON_COUNT;
-    gEditor.con_size--;
-  } else if (gEditor.con_front == -1) {
-    gEditor.con_front = 0;
+  if (editor.con_front == editor.con_rear) {
+    editor.con_front = (editor.con_front + 1) % EDITOR_CON_COUNT;
+    editor.con_size--;
+  } else if (editor.con_front == -1) {
+    editor.con_front = 0;
   }
-  gEditor.con_size++;
-  gEditor.con_rear = (gEditor.con_rear + 1) % EDITOR_CON_COUNT;
+  editor.con_size++;
+  editor.con_rear = (editor.con_rear + 1) % EDITOR_CON_COUNT;
 }
 
 void editorMsgClear(void) {
-  gEditor.con_front = -1;
-  gEditor.con_rear = 0;
-  gEditor.con_size = 0;
+  editor.con_front = -1;
+  editor.con_rear = 0;
+  editor.con_size = 0;
 }
 
 static void editorSetPrompt(const char* fmt, ...) {
   va_list ap;
   va_start(ap, fmt);
-  vsnprintf(gEditor.prompt, sizeof(gEditor.prompt), fmt, ap);
+  vsnprintf(editor.prompt, sizeof(editor.prompt), fmt, ap);
   va_end(ap);
 }
 
 static void editorSetRightPrompt(const char* fmt, ...) {
   va_list ap;
   va_start(ap, fmt);
-  vsnprintf(gEditor.prompt_right, sizeof(gEditor.prompt_right), fmt, ap);
+  vsnprintf(editor.prompt_right, sizeof(editor.prompt_right), fmt, ap);
   va_end(ap);
 }
 
@@ -53,8 +53,8 @@ static void editorSetRightPrompt(const char* fmt, ...) {
 #define PROMPT_BUF_GROWTH_RATE 2.0f
 
 char* editorPrompt(char* prompt, int state, void (*callback)(char*, int)) {
-  int old_state = gEditor.state;
-  gEditor.state = state;
+  int old_state = editor.state;
+  editor.state = state;
 
   size_t bufsize = PROMPT_BUF_INIT_SIZE;
   char* buf = malloc_s(bufsize);
@@ -66,7 +66,7 @@ char* editorPrompt(char* prompt, int state, void (*callback)(char*, int)) {
   while (prompt[start] != '\0' && prompt[start] != '%') {
     start++;
   }
-  gEditor.px = start;
+  editor.px = start;
   while (true) {
     editorSetPrompt(prompt, buf);
     editorRefreshScreen();
@@ -75,7 +75,7 @@ char* editorPrompt(char* prompt, int state, void (*callback)(char*, int)) {
     int x = input.data.cursor.x;
     int y = input.data.cursor.y;
 
-    size_t idx = gEditor.px - start;
+    size_t idx = editor.px - start;
     switch (input.type) {
       case DEL_KEY:
         if (idx != buflen)
@@ -94,9 +94,9 @@ char* editorPrompt(char* prompt, int state, void (*callback)(char*, int)) {
         break;
 
       case CTRL_KEY('v'): {
-        if (!gEditor.clipboard.size) break;
+        if (!editor.clipboard.size) break;
         // Only paste the first line
-        const char* paste_buf = gEditor.clipboard.data[0];
+        const char* paste_buf = editor.clipboard.data[0];
         size_t paste_len = strlen(paste_buf);
         if (paste_len == 0) break;
 
@@ -161,7 +161,7 @@ char* editorPrompt(char* prompt, int state, void (*callback)(char*, int)) {
       case CTRL_KEY('q'):
       case ESC:
         editorSetPrompt("");
-        gEditor.state = old_state;
+        editor.state = old_state;
         if (callback) callback(buf, input.type);
         free(buf);
         return NULL;
@@ -169,7 +169,7 @@ char* editorPrompt(char* prompt, int state, void (*callback)(char*, int)) {
       case '\r':
         if (buflen != 0) {
           editorSetPrompt("");
-          gEditor.state = old_state;
+          editor.state = old_state;
           if (callback) callback(buf, input.type);
           return buf;
         }
@@ -198,7 +198,7 @@ char* editorPrompt(char* prompt, int state, void (*callback)(char*, int)) {
       default:
         if (callback) callback(buf, input.type);
     }
-    gEditor.px = start + idx;
+    editor.px = start + idx;
   }
 }
 

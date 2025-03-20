@@ -17,7 +17,7 @@ int main(int argc, char* argv[]) {
 
   if (cmd_args.count > 1) {
     for (int i = 1; i < cmd_args.count; i++) {
-      if (gEditor.file_count >= EDITOR_FILE_MAX_SLOT) {
+      if (editor.file_count >= EDITOR_FILE_MAX_SLOT) {
         editorMsg("Already opened too many files!");
         break;
       }
@@ -30,14 +30,14 @@ int main(int argc, char* argv[]) {
 
   argsFree(cmd_args);
 
-  if (gEditor.file_count == 0) {
+  if (editor.file_count == 0) {
     editorAddFile(&file);
     editorInsertRow(gCurFile, 0, "", 0);
   }
 
-  gEditor.loading = false;
+  editor.loading = false;
 
-  while (gEditor.file_count) {
+  while (editor.file_count) {
     editorRefreshScreen();
     editorProcessKeypress();
   }

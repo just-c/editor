@@ -102,7 +102,7 @@ typedef struct Editor {
 } Editor;
 
 // Text editor
-extern Editor gEditor;
+extern Editor editor;
 
 // Current file
 extern EditorFile* gCurFile;

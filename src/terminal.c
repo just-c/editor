@@ -204,7 +204,7 @@ EditorInput editorReadKey(void) {
     }
 
     // Mouse input
-    if (seq[1] == '<' && gEditor.mouse_mode) {
+    if (seq[1] == '<' && editor.mouse_mode) {
       int type;
       char m;
       sscanf(&seq[2], "%d;%d;%d%c", &type, &result.data.cursor.x,
@@ -316,15 +316,15 @@ static void disableSwap(void) {
 }
 
 void enableMouse(void) {
-  if (!gEditor.mouse_mode &&
+  if (!editor.mouse_mode &&
       write(STDOUT_FILENO, "\x1b[?1002h\x1b[?1015h\x1b[?1006h", 24) == 24)
-    gEditor.mouse_mode = true;
+    editor.mouse_mode = true;
 }
 
 void disableMouse(void) {
-  if (gEditor.mouse_mode &&
+  if (editor.mouse_mode &&
       write(STDOUT_FILENO, "\x1b[?1002l\x1b[?1015l\x1b[?1006l", 24) == 24)
-    gEditor.mouse_mode = false;
+    editor.mouse_mode = false;
 }
 
 void resizeWindow(void) {
@@ -333,13 +333,13 @@ void resizeWindow(void) {
 
   if (getWindowSize(&rows, &cols) == -1) PANIC("getWindowSize");
 
-  if (gEditor.screen_rows != rows || gEditor.screen_cols != cols) {
-    gEditor.screen_rows = rows;
-    gEditor.screen_cols = cols;
+  if (editor.screen_rows != rows || editor.screen_cols != cols) {
+    editor.screen_rows = rows;
+    editor.screen_cols = cols;
     // TODO: Don't hard coding rows
-    gEditor.display_rows = rows - 2;
+    editor.display_rows = rows - 2;
 
-    if (!gEditor.loading) editorRefreshScreen();
+    if (!editor.loading) editorRefreshScreen();
   }
 }
 

@@ -189,7 +189,7 @@ void editorSelectSyntaxHighlight(EditorFile* file) {
 
   char* ext = strrchr(file->filename, '.');
 
-  for (EditorSyntax* s = gEditor.HLDB; s; s = s->next) {
+  for (EditorSyntax* s = editor.HLDB; s; s = s->next) {
     for (size_t i = 0; i < s->file_exts.size; i++) {
       int is_ext = (s->file_exts.data[i][0] == '.');
       if ((is_ext && ext && strCaseCmp(ext, s->file_exts.data[i]) == 0) ||
@@ -251,7 +251,7 @@ static void editorLoadNinoConfigHLDB(void) {
   syntax->multiline_comment_start = NULL;
   syntax->multiline_comment_end = NULL;
 
-  EditorConCmd* curr = gEditor.cvars;
+  EditorConCmd* curr = editor.cvars;
   while (curr) {
     vector_push(syntax->keywords[curr->has_callback ? 0 : 1], curr->name);
     curr = curr->next;
@@ -264,8 +264,8 @@ static void editorLoadNinoConfigHLDB(void) {
   syntax->flags = HL_HIGHLIGHT_STRINGS;
 
   // Add to HLDB
-  syntax->next = gEditor.HLDB;
-  gEditor.HLDB = syntax;
+  syntax->next = editor.HLDB;
+  editor.HLDB = syntax;
 }
 
 static bool editorLoadJsonHLDB(const char* json, EditorSyntax* syntax) {
@@ -344,8 +344,8 @@ static void editorLoadBundledHLDB(void) {
     EditorSyntax* syntax = calloc_s(1, sizeof(EditorSyntax));
     if (editorLoadJsonHLDB(bundle[i], syntax)) {
       // Add to HLDB
-      syntax->next = gEditor.HLDB;
-      gEditor.HLDB = syntax;
+      syntax->next = editor.HLDB;
+      editor.HLDB = syntax;
     } else {
       free(syntax);
     }
@@ -377,8 +377,8 @@ bool editorLoadHLDB(const char* path) {
   EditorSyntax* syntax = calloc_s(1, sizeof(EditorSyntax));
   if (editorLoadJsonHLDB(buffer, syntax)) {
     // Add to HLDB
-    syntax->next = gEditor.HLDB;
-    gEditor.HLDB = syntax;
+    syntax->next = editor.HLDB;
+    editor.HLDB = syntax;
   } else {
     free(syntax);
   }
@@ -388,7 +388,7 @@ bool editorLoadHLDB(const char* path) {
 }
 
 void editorFreeHLDB(void) {
-  EditorSyntax* HLDB = gEditor.HLDB;
+  EditorSyntax* HLDB = editor.HLDB;
   while (HLDB) {
     EditorSyntax* temp = HLDB;
     HLDB = HLDB->next;
@@ -400,5 +400,5 @@ void editorFreeHLDB(void) {
     free(temp);
   }
   json_arena_deinit(&hldb_arena);
-  gEditor.HLDB = NULL;
+  editor.HLDB = NULL;
 }

@@ -16,7 +16,7 @@
 #include "utils.h"
 
 void editorScrollToCursor(void) {
-  int cols = gEditor.screen_cols - gCurFile->lineno_width;
+  int cols = editor.screen_cols - gCurFile->lineno_width;
   int rx = 0;
   if (gCurFile->cursor.y < gCurFile->num_rows) {
     rx =
@@ -26,8 +26,8 @@ void editorScrollToCursor(void) {
   if (gCurFile->cursor.y < gCurFile->row_offset) {
     gCurFile->row_offset = gCurFile->cursor.y;
   }
-  if (gCurFile->cursor.y >= gCurFile->row_offset + gEditor.display_rows) {
-    gCurFile->row_offset = gCurFile->cursor.y - gEditor.display_rows + 1;
+  if (gCurFile->cursor.y >= gCurFile->row_offset + editor.display_rows) {
+    gCurFile->row_offset = gCurFile->cursor.y - editor.display_rows + 1;
   }
   if (rx < gCurFile->col_offset) {
     gCurFile->col_offset = rx;
@@ -38,19 +38,19 @@ void editorScrollToCursor(void) {
 }
 
 void editorScrollToCursorCenter(void) {
-  gCurFile->row_offset = gCurFile->cursor.y - gEditor.display_rows / 2;
+  gCurFile->row_offset = gCurFile->cursor.y - editor.display_rows / 2;
   if (gCurFile->row_offset < 0) {
     gCurFile->row_offset = 0;
   }
 }
 
 int getMousePosField(int x, int y) {
-  if (y < 0 || y >= gEditor.screen_rows) return FIELD_ERROR;
+  if (y < 0 || y >= editor.screen_rows) return FIELD_ERROR;
   if (y == 0) return FIELD_TOP_STATUS;
-  if (y == gEditor.screen_rows - 2 && gEditor.state != EDIT_MODE)
+  if (y == editor.screen_rows - 2 && editor.state != EDIT_MODE)
     return FIELD_PROMPT;
-  if (y == gEditor.screen_rows - 1) return FIELD_STATUS;
-  if (gEditor.file_count == 0) return FIELD_EMPTY;
+  if (y == editor.screen_rows - 1) return FIELD_STATUS;
+  if (editor.file_count == 0) return FIELD_EMPTY;
   if (x < gCurFile->lineno_width) return FIELD_LINENO;
   return FIELD_TEXT;
 }
@@ -226,32 +226,31 @@ static char isCloseBracket(int key) {
 }
 
 static int handleTabClick(int x) {
-  if (gEditor.loading) return -1;
+  if (editor.loading) return -1;
 
   bool has_more_files = false;
   int tab_displayed = 0;
   int len = 0;
-  if (gEditor.tab_offset != 0) {
+  if (editor.tab_offset != 0) {
     len++;
   }
 
-  for (int i = 0; i < gEditor.file_count; i++) {
-    if (i < gEditor.tab_offset) continue;
+  for (int i = 0; i < editor.file_count; i++) {
+    if (i < editor.tab_offset) continue;
 
-    const EditorFile* file = &gEditor.files[i];
+    const EditorFile* file = &editor.files[i];
     const char* filename =
         file->filename ? getBaseName(file->filename) : "Untitled";
     int tab_width = strUTF8Width(filename) + 2;
 
     if (file->dirty) tab_width++;
 
-    if (gEditor.screen_cols - len < tab_width ||
-        (i != gEditor.file_count - 1 &&
-         gEditor.screen_cols - len == tab_width)) {
+    if (editor.screen_cols - len < tab_width ||
+        (i != editor.file_count - 1 && editor.screen_cols - len == tab_width)) {
       has_more_files = true;
       if (tab_displayed == 0) {
         // Display at least one tab
-        tab_width = gEditor.screen_cols - len - 1;
+        tab_width = editor.screen_cols - len - 1;
       } else {
         break;
       }
@@ -262,7 +261,7 @@ static int handleTabClick(int x) {
 
     tab_displayed++;
   }
-  if (has_more_files) gEditor.tab_offset++;
+  if (has_more_files) editor.tab_offset++;
   return -1;
 }
 
@@ -279,12 +278,12 @@ static bool moveMouse(int x, int y) {
 // Protect closing file with unsaved changes
 static int close_protect = -1;
 static void editorCloseFile(int index) {
-  if (index < 0 || index > gEditor.file_count) {
+  if (index < 0 || index > editor.file_count) {
     close_protect = -1;
     return;
   }
 
-  if (gEditor.files[index].dirty && close_protect != index) {
+  if (editor.files[index].dirty && close_protect != index) {
     editorMsg(
         "File has unsaved changes. Press again to close file "
         "anyway.");
@@ -294,9 +293,9 @@ static void editorCloseFile(int index) {
 
   editorRemoveFile(index);
 
-  if (index < gEditor.file_index ||
-      (gEditor.file_index == index && index == gEditor.file_count)) {
-    editorChangeToFile(gEditor.file_index - 1);
+  if (index < editor.file_index ||
+      (editor.file_index == index && index == editor.file_count)) {
+    editorChangeToFile(editor.file_index - 1);
   }
 }
 
@@ -368,8 +367,8 @@ void editorProcessKeypress(void) {
       close_protect = -1;
       editorFreeAction(action);
       bool dirty = false;
-      for (int i = 0; i < gEditor.file_count; i++) {
-        if (gEditor.files[i].dirty) {
+      for (int i = 0; i < editor.file_count; i++) {
+        if (editor.files[i].dirty) {
           dirty = true;
           break;
         }
@@ -391,7 +390,7 @@ void editorProcessKeypress(void) {
     case CTRL_KEY('w'):
       quit_protect = true;
       editorFreeAction(action);
-      editorCloseFile(gEditor.file_index);
+      editorCloseFile(editor.file_index);
       return;
 
     // Save
@@ -404,9 +403,9 @@ void editorProcessKeypress(void) {
     case ALT_KEY(CTRL_KEY('s')):
       // Alt+Ctrl+S
       should_scroll = false;
-      for (int i = 0; i < gEditor.file_count; i++) {
-        if (gEditor.files[i].dirty) {
-          editorSave(&gEditor.files[i], 0);
+      for (int i = 0; i < editor.file_count; i++) {
+        if (editor.files[i].dirty) {
+          editorSave(&editor.files[i], 0);
         }
       }
       break;
@@ -567,7 +566,7 @@ void editorProcessKeypress(void) {
       if (gCurFile->num_rows == 1 && gCurFile->row[0].size == 0) break;
 
       should_record_action = true;
-      editorFreeClipboardContent(&gEditor.clipboard);
+      editorFreeClipboardContent(&editor.clipboard);
 
       if (!gCurFile->cursor.is_selected) {
         // Copy line
@@ -576,7 +575,7 @@ void editorProcessKeypress(void) {
                               isNonSpace),
             gCurFile->cursor.y, gCurFile->row[gCurFile->cursor.y].size,
             gCurFile->cursor.y};
-        editorCopyText(&gEditor.clipboard, range);
+        editorCopyText(&editor.clipboard, range);
 
         // Delete line
         range.start_x = 0;
@@ -596,21 +595,21 @@ void editorProcessKeypress(void) {
       } else {
         getSelectStartEnd(&edit->deleted_range);
         editorCopyText(&edit->deleted_text, edit->deleted_range);
-        editorCopyText(&gEditor.clipboard, edit->deleted_range);
+        editorCopyText(&editor.clipboard, edit->deleted_range);
         editorDeleteText(edit->deleted_range);
         gCurFile->cursor.is_selected = false;
       }
-      editorCopyToSysClipboard(&gEditor.clipboard);
+      editorCopyToSysClipboard(&editor.clipboard);
     } break;
 
     // Copy
     case CTRL_KEY('c'): {
-      editorFreeClipboardContent(&gEditor.clipboard);
+      editorFreeClipboardContent(&editor.clipboard);
       should_scroll = false;
       if (gCurFile->cursor.is_selected) {
         EditorSelectRange range;
         getSelectStartEnd(&range);
-        editorCopyText(&gEditor.clipboard, range);
+        editorCopyText(&editor.clipboard, range);
       } else {
         // Copy line
         EditorSelectRange range = {
@@ -618,14 +617,14 @@ void editorProcessKeypress(void) {
                               isNonSpace),
             gCurFile->cursor.y, gCurFile->row[gCurFile->cursor.y].size,
             gCurFile->cursor.y};
-        editorCopyText(&gEditor.clipboard, range);
+        editorCopyText(&editor.clipboard, range);
       }
-      editorCopyToSysClipboard(&gEditor.clipboard);
+      editorCopyToSysClipboard(&editor.clipboard);
     } break;
 
     // Action: Paste
     case CTRL_KEY('v'): {
-      if (!gEditor.clipboard.size) break;
+      if (!editor.clipboard.size) break;
 
       should_record_action = true;
 
@@ -639,7 +638,7 @@ void editorProcessKeypress(void) {
 
       edit->added_range.start_x = gCurFile->cursor.x;
       edit->added_range.start_y = gCurFile->cursor.y;
-      editorPasteText(&gEditor.clipboard, gCurFile->cursor.x,
+      editorPasteText(&editor.clipboard, gCurFile->cursor.x,
                       gCurFile->cursor.y);
 
       edit->added_range.end_x = gCurFile->cursor.x;
@@ -674,23 +673,23 @@ void editorProcessKeypress(void) {
     // Previous file
     case CTRL_KEY('['):
       should_scroll = false;
-      if (gEditor.file_count < 2) break;
+      if (editor.file_count < 2) break;
 
-      if (gEditor.file_index == 0)
-        editorChangeToFile(gEditor.file_count - 1);
+      if (editor.file_index == 0)
+        editorChangeToFile(editor.file_count - 1);
       else
-        editorChangeToFile(gEditor.file_index - 1);
+        editorChangeToFile(editor.file_index - 1);
       break;
 
     // Next file
     case CTRL_KEY(']'):
       should_scroll = false;
-      if (gEditor.file_count < 2) break;
+      if (editor.file_count < 2) break;
 
-      if (gEditor.file_index == gEditor.file_count - 1)
+      if (editor.file_index == editor.file_count - 1)
         editorChangeToFile(0);
       else
-        editorChangeToFile(gEditor.file_index + 1);
+        editorChangeToFile(editor.file_index + 1);
       break;
 
     case SHIFT_PAGE_UP:
@@ -704,11 +703,11 @@ void editorProcessKeypress(void) {
         if (c == PAGE_UP || c == SHIFT_PAGE_UP) {
           gCurFile->cursor.y = gCurFile->row_offset;
         } else if (c == PAGE_DOWN || c == SHIFT_PAGE_DOWN) {
-          gCurFile->cursor.y = gCurFile->row_offset + gEditor.display_rows - 1;
+          gCurFile->cursor.y = gCurFile->row_offset + editor.display_rows - 1;
           if (gCurFile->cursor.y >= gCurFile->num_rows)
             gCurFile->cursor.y = gCurFile->num_rows - 1;
         }
-        int times = gEditor.display_rows;
+        int times = editor.display_rows;
         while (times--) {
           if (c == PAGE_UP || c == SHIFT_PAGE_UP) {
             if (gCurFile->cursor.y == 0) {
@@ -991,7 +990,7 @@ void editorProcessKeypress(void) {
       should_scroll = false;
       if (field != FIELD_TEXT && field != FIELD_LINENO) {
         if (field == FIELD_TOP_STATUS) {
-          if (gEditor.tab_offset > 0) gEditor.tab_offset--;
+          if (editor.tab_offset > 0) editor.tab_offset--;
         }
         break;
       }
@@ -1009,7 +1008,7 @@ void editorProcessKeypress(void) {
       should_scroll = false;
       if (field != FIELD_TEXT && field != FIELD_LINENO) {
         if (field == FIELD_TOP_STATUS) {
-          handleTabClick(gEditor.screen_cols);
+          handleTabClick(editor.screen_cols);
         }
         break;
       }

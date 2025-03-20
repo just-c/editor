@@ -14,8 +14,8 @@
 #include "row.h"
 
 static int isFileOpened(FileInfo info) {
-  for (int i = 0; i < gEditor.file_count; i++) {
-    if (areFilesEqual(gEditor.files[i].file_info, info)) {
+  for (int i = 0; i < editor.file_count; i++) {
+    if (areFilesEqual(editor.files[i].file_info, info)) {
       return i;
     }
   }
@@ -218,7 +218,7 @@ void editorSave(EditorFile* file, int save_as) {
 }
 
 void editorOpenFilePrompt(void) {
-  if (gEditor.file_count >= EDITOR_FILE_MAX_SLOT) {
+  if (editor.file_count >= EDITOR_FILE_MAX_SLOT) {
     editorMsg("Reached max file slots! Cannot open more files.",
               strerror(errno));
     return;
@@ -230,8 +230,8 @@ void editorOpenFilePrompt(void) {
   EditorFile file;
   if (editorOpen(&file, path)) {
     int index = editorAddFile(&file);
-    gEditor.state = EDIT_MODE;
-    // hack: refresh screen to update gEditor.tab_displayed
+    editor.state = EDIT_MODE;
+    // hack: refresh screen to update editor.tab_displayed
     editorRefreshScreen();
     editorChangeToFile(index);
   }
