@@ -16,20 +16,22 @@ all: release/nino
 
 # Release build
 release/nino: resources/bundle.h $(addprefix release/, $(OBJECT_FILES))
+	@mkdir -p release
 	$(COMPILER) $(COMPILER_FLAGS) $(RELEASE_FLAGS) -o $@ $^
 
 release/%.o: src/%.c
-	mkdir -p release
+	@mkdir -p release
 	$(COMPILER) -c $(COMPILER_FLAGS) $(RELEASE_FLAGS) -o $@ $<
 
 # Debug build
 debug: debug/nino
 
 debug/nino: resources/bundle.h $(addprefix debug/, $(OBJECT_FILES))
+	@mkdir -p debug
 	$(COMPILER) $(COMPILER_FLAGS) $(DEBUG_FLAGS) -o $@ $^
 
 debug/%.o: src/%.c
-	mkdir -p debug
+	@mkdir -p debug
 	$(COMPILER) -c $(COMPILER_FLAGS) $(DEBUG_FLAGS) -o $@ $<
 
 # Bundle generation
