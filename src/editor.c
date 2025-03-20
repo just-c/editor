@@ -11,7 +11,7 @@
 #include "utils.h"
 
 Editor editor;
-EditorFile* gCurFile;
+EditorFile* current_file;
 
 void editorInit(void) {
   memset(&editor, 0, sizeof(Editor));
@@ -27,7 +27,7 @@ void editorInit(void) {
 
   // Draw loading
   memset(&editor.files[0], 0, sizeof(EditorFile));
-  gCurFile = &editor.files[0];
+  current_file = &editor.files[0];
   editorRefreshScreen();
 }
 
@@ -88,7 +88,7 @@ void editorRemoveFile(int index) {
 void editorChangeToFile(int index) {
   if (index < 0 || index >= editor.file_count) return;
   editor.file_index = index;
-  gCurFile = &editor.files[index];
+  current_file = &editor.files[index];
 
   if (editor.tab_offset > index ||
       editor.tab_offset + editor.tab_displayed <= index) {

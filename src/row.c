@@ -74,12 +74,12 @@ void editorRowAppendString(EditorFile* file, EditorRow* row, const char* s,
 }
 
 void editorInsertChar(int c) {
-  if (gCurFile->cursor.y == gCurFile->num_rows) {
-    editorInsertRow(gCurFile, gCurFile->num_rows, "", 0);
+  if (current_file->cursor.y == current_file->num_rows) {
+    editorInsertRow(current_file, current_file->num_rows, "", 0);
   }
   if (c == '\t' && CONVAR_GETINT(whitespace)) {
-    int idx = editorRowCxToRx(&gCurFile->row[gCurFile->cursor.y],
-                              gCurFile->cursor.x) +
+    int idx = editorRowCxToRx(&current_file->row[current_file->cursor.y],
+                              current_file->cursor.x) +
               1;
     editorInsertChar(' ');
     while (idx % CONVAR_GETINT(tabsize) != 0) {
@@ -87,9 +87,10 @@ void editorInsertChar(int c) {
       idx++;
     }
   } else {
-    editorRowInsertChar(gCurFile, &gCurFile->row[gCurFile->cursor.y],
-                        gCurFile->cursor.x, c);
-    gCurFile->cursor.x++;
+    editorRowInsertChar(current_file,
+                        &current_file->row[current_file->cursor.y],
+                        current_file->cursor.x, c);
+    current_file->cursor.x++;
   }
 }
 
@@ -106,57 +107,60 @@ void editorInsertUnicode(uint32_t unicode) {
 void editorInsertNewline(void) {
   int i = 0;
 
-  if (gCurFile->cursor.x == 0) {
-    editorInsertRow(gCurFile, gCurFile->cursor.y, "", 0);
+  if (current_file->cursor.x == 0) {
+    editorInsertRow(current_file, current_file->cursor.y, "", 0);
   } else {
-    editorInsertRow(gCurFile, gCurFile->cursor.y + 1, "", 0);
-    EditorRow* curr_row = &gCurFile->row[gCurFile->cursor.y];
-    EditorRow* new_row = &gCurFile->row[gCurFile->cursor.y + 1];
+    editorInsertRow(current_file, current_file->cursor.y + 1, "", 0);
+    EditorRow* curr_row = &current_file->row[current_file->cursor.y];
+    EditorRow* new_row = &current_file->row[current_file->cursor.y + 1];
     if (CONVAR_GETINT(autoindent)) {
-      while (i < gCurFile->cursor.x &&
+      while (i < current_file->cursor.x &&
              (curr_row->data[i] == ' ' || curr_row->data[i] == '\t'))
         i++;
-      if (i != 0) editorRowAppendString(gCurFile, new_row, curr_row->data, i);
-      if (curr_row->data[gCurFile->cursor.x - 1] == ':' ||
-          (curr_row->data[gCurFile->cursor.x - 1] == '{' &&
-           curr_row->data[gCurFile->cursor.x] != '}')) {
+      if (i != 0)
+        editorRowAppendString(current_file, new_row, curr_row->data, i);
+      if (curr_row->data[current_file->cursor.x - 1] == ':' ||
+          (curr_row->data[current_file->cursor.x - 1] == '{' &&
+           curr_row->data[current_file->cursor.x] != '}')) {
         if (CONVAR_GETINT(whitespace)) {
           for (int j = 0; j < CONVAR_GETINT(tabsize); j++, i++)
-            editorRowAppendString(gCurFile, new_row, " ", 1);
+            editorRowAppendString(current_file, new_row, " ", 1);
         } else {
-          editorRowAppendString(gCurFile, new_row, "\t", 1);
+          editorRowAppendString(current_file, new_row, "\t", 1);
           i++;
         }
       }
     }
-    editorRowAppendString(gCurFile, new_row,
-                          &curr_row->data[gCurFile->cursor.x],
-                          curr_row->size - gCurFile->cursor.x);
-    curr_row->size = gCurFile->cursor.x;
+    editorRowAppendString(current_file, new_row,
+                          &curr_row->data[current_file->cursor.x],
+                          curr_row->size - current_file->cursor.x);
+    curr_row->size = current_file->cursor.x;
     curr_row->data[curr_row->size] = '\0';
-    editorUpdateRow(gCurFile, curr_row);
+    editorUpdateRow(current_file, curr_row);
   }
-  gCurFile->cursor.y++;
-  gCurFile->cursor.x = i;
-  gCurFile->sx = editorRowCxToRx(&gCurFile->row[gCurFile->cursor.y], i);
+  current_file->cursor.y++;
+  current_file->cursor.x = i;
+  current_file->sx =
+      editorRowCxToRx(&current_file->row[current_file->cursor.y], i);
 }
 
 void editorDelChar(void) {
-  if (gCurFile->cursor.y == gCurFile->num_rows) return;
-  if (gCurFile->cursor.x == 0 && gCurFile->cursor.y == 0) return;
-  EditorRow* row = &gCurFile->row[gCurFile->cursor.y];
-  if (gCurFile->cursor.x > 0) {
-    editorRowDelChar(gCurFile, row, gCurFile->cursor.x - 1);
-    gCurFile->cursor.x--;
+  if (current_file->cursor.y == current_file->num_rows) return;
+  if (current_file->cursor.x == 0 && current_file->cursor.y == 0) return;
+  EditorRow* row = &current_file->row[current_file->cursor.y];
+  if (current_file->cursor.x > 0) {
+    editorRowDelChar(current_file, row, current_file->cursor.x - 1);
+    current_file->cursor.x--;
   } else {
-    gCurFile->cursor.x = gCurFile->row[gCurFile->cursor.y - 1].size;
-    editorRowAppendString(gCurFile, &gCurFile->row[gCurFile->cursor.y - 1],
+    current_file->cursor.x = current_file->row[current_file->cursor.y - 1].size;
+    editorRowAppendString(current_file,
+                          &current_file->row[current_file->cursor.y - 1],
                           row->data, row->size);
-    editorDelRow(gCurFile, gCurFile->cursor.y);
-    gCurFile->cursor.y--;
+    editorDelRow(current_file, current_file->cursor.y);
+    current_file->cursor.y--;
   }
-  gCurFile->sx =
-      editorRowCxToRx(&gCurFile->row[gCurFile->cursor.y], gCurFile->cursor.x);
+  current_file->sx = editorRowCxToRx(&current_file->row[current_file->cursor.y],
+                                     current_file->cursor.x);
 }
 
 int editorRowNextUTF8(EditorRow* row, int cx) {

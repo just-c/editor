@@ -105,7 +105,7 @@ typedef struct Editor {
 extern Editor editor;
 
 // Current file
-extern EditorFile* gCurFile;
+extern EditorFile* current_file;
 
 void editorInit(void);
 void editorFree(void);

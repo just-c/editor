@@ -32,7 +32,7 @@ int main(int argc, char* argv[]) {
 
   if (editor.file_count == 0) {
     editorAddFile(&file);
-    editorInsertRow(gCurFile, 0, "", 0);
+    editorInsertRow(current_file, 0, "", 0);
   }
 
   editor.loading = false;

@@ -160,7 +160,7 @@ CON_COMMAND(lang, "Set the syntax highlighting language of the current file.") {
   for (EditorSyntax* s = editor.HLDB; s; s = s->next) {
     // Match the language name or the externaion
     if (strCaseCmp(name, s->file_type) == 0) {
-      editorSetSyntaxHighlight(gCurFile, s);
+      editorSetSyntaxHighlight(current_file, s);
       return;
     }
 
@@ -168,7 +168,7 @@ CON_COMMAND(lang, "Set the syntax highlighting language of the current file.") {
       int is_ext = (s->file_exts.data[i][0] == '.');
       if ((is_ext && strCaseCmp(name, &s->file_exts.data[i][1]) == 0) ||
           (!is_ext && strCaseStr(name, s->file_exts.data[i]))) {
-        editorSetSyntaxHighlight(gCurFile, s);
+        editorSetSyntaxHighlight(current_file, s);
         return;
       }
     }
@@ -213,7 +213,7 @@ CON_COMMAND(hldb_reload_all, "Reload syntax highlighting database.") {
 
 CON_COMMAND(newline, "Set the EOL sequence (LF/CRLF).") {
   if (args.argc == 1) {
-    editorMsg("%s", (gCurFile->newline == NL_UNIX) ? "LF" : "CRLF");
+    editorMsg("%s", (current_file->newline == NL_UNIX) ? "LF" : "CRLF");
     return;
   }
 
@@ -228,16 +228,16 @@ CON_COMMAND(newline, "Set the EOL sequence (LF/CRLF).") {
     return;
   }
 
-  if (gCurFile->newline == nl) {
+  if (current_file->newline == nl) {
     return;
   }
 
   EditorAction* action = calloc_s(1, sizeof(EditorAction));
   action->type = ACTION_ATTRI;
   action->attri.new_newline = nl;
-  action->attri.old_newline = gCurFile->newline;
+  action->attri.old_newline = current_file->newline;
 
-  gCurFile->newline = nl;
+  current_file->newline = nl;
 
   editorAppendAction(action);
 }

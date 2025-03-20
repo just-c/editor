@@ -25,7 +25,7 @@ void editorRowDelChar(EditorFile* file, EditorRow* row, int at);
 void editorRowAppendString(EditorFile* file, EditorRow* row, const char* s,
                            size_t len);
 
-// On gCurFile
+// On current_file
 void editorInsertChar(int c);
 void editorInsertUnicode(uint32_t unicode);
 void editorInsertNewline(void);

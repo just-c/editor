@@ -43,7 +43,7 @@ static void editorDrawTopStatusBar(abuf* ab) {
 
       const EditorFile* file = &editor.files[i];
 
-      bool is_current = (file == gCurFile);
+      bool is_current = (file == current_file);
       if (is_current) {
         setColor(ab, editor.color_cfg.top_status[4], 0);
         setColor(ab, editor.color_cfg.top_status[5], 1);
@@ -203,16 +203,16 @@ static void editorDrawStatusBar(abuf* ab) {
     pos_len = 0;
   } else {
     const char* file_type =
-        gCurFile->syntax ? gCurFile->syntax->file_type : "Plain Text";
-    int row = gCurFile->cursor.y + 1;
-    int col = editorRowCxToRx(&gCurFile->row[gCurFile->cursor.y],
-                              gCurFile->cursor.x) +
+        current_file->syntax ? current_file->syntax->file_type : "Plain Text";
+    int row = current_file->cursor.y + 1;
+    int col = editorRowCxToRx(&current_file->row[current_file->cursor.y],
+                              current_file->cursor.x) +
               1;
     float line_percent = 0.0f;
-    const char* nl_type = (gCurFile->newline == NL_UNIX) ? "LF" : "CRLF";
-    if (gCurFile->num_rows - 1 > 0) {
-      line_percent =
-          (float)gCurFile->row_offset / (gCurFile->num_rows - 1) * 100.0f;
+    const char* nl_type = (current_file->newline == NL_UNIX) ? "LF" : "CRLF";
+    if (current_file->num_rows - 1 > 0) {
+      line_percent = (float)current_file->row_offset /
+                     (current_file->num_rows - 1) * 100.0f;
     }
 
     lang_len = snprintf(lang, sizeof(lang), "  %s  ", file_type);
@@ -247,19 +247,19 @@ static void editorDrawRows(abuf* ab) {
   setColor(ab, editor.color_cfg.bg, 1);
 
   EditorSelectRange range = {0};
-  if (gCurFile->cursor.is_selected) getSelectStartEnd(&range);
+  if (current_file->cursor.is_selected) getSelectStartEnd(&range);
 
-  for (int i = gCurFile->row_offset, s_row = 2;
-       i < gCurFile->row_offset + editor.display_rows; i++, s_row++) {
+  for (int i = current_file->row_offset, s_row = 2;
+       i < current_file->row_offset + editor.display_rows; i++, s_row++) {
     bool is_row_full = false;
     // Move cursor to the beginning of a row
     gotoXY(ab, s_row, 1);
 
     editor.color_cfg.highlightBg[HL_BG_NORMAL] = editor.color_cfg.bg;
-    if (i < gCurFile->num_rows) {
+    if (i < current_file->num_rows) {
       char line_number[16];
-      if (i == gCurFile->cursor.y) {
-        if (!gCurFile->cursor.is_selected) {
+      if (i == current_file->cursor.y) {
+        if (!current_file->cursor.is_selected) {
           editor.color_cfg.highlightBg[HL_BG_NORMAL] =
               editor.color_cfg.cursor_line;
         }
@@ -271,24 +271,25 @@ static void editorDrawRows(abuf* ab) {
       }
 
       snprintf(line_number, sizeof(line_number), " %*d ",
-               gCurFile->lineno_width - 2, i + 1);
+               current_file->lineno_width - 2, i + 1);
       abufAppend(ab, line_number);
 
       abufAppend(ab, ANSI_CLEAR);
       setColor(ab, editor.color_cfg.bg, 1);
 
-      int cols = editor.screen_cols - gCurFile->lineno_width;
-      int col_offset = editorRowRxToCx(&gCurFile->row[i], gCurFile->col_offset);
-      int len = gCurFile->row[i].size - col_offset;
+      int cols = editor.screen_cols - current_file->lineno_width;
+      int col_offset =
+          editorRowRxToCx(&current_file->row[i], current_file->col_offset);
+      int len = current_file->row[i].size - col_offset;
       len = (len < 0) ? 0 : len;
 
-      int rlen = gCurFile->row[i].rsize - gCurFile->col_offset;
+      int rlen = current_file->row[i].rsize - current_file->col_offset;
       is_row_full = (rlen > cols);
       rlen = is_row_full ? cols : rlen;
-      rlen += gCurFile->col_offset;
+      rlen += current_file->col_offset;
 
-      char* c = &gCurFile->row[i].data[col_offset];
-      uint8_t* hl = &(gCurFile->row[i].hl[col_offset]);
+      char* c = &current_file->row[i].data[col_offset];
+      uint8_t* hl = &(current_file->row[i].hl[col_offset]);
       uint8_t curr_fg = HL_BG_NORMAL;
       uint8_t curr_bg = HL_NORMAL;
 
@@ -296,7 +297,7 @@ static void editorDrawRows(abuf* ab) {
       setColor(ab, editor.color_cfg.highlightBg[curr_bg], 1);
 
       int j = 0;
-      int rx = gCurFile->col_offset;
+      int rx = current_file->col_offset;
       while (rx < rlen) {
         if (iscntrl(c[j]) && c[j] != '\t') {
           char sym = (c[j] <= 26) ? '@' + c[j] : '?';
@@ -312,7 +313,7 @@ static void editorDrawRows(abuf* ab) {
           uint8_t fg = hl[j] & HL_FG_MASK;
           uint8_t bg = hl[j] >> HL_FG_BITS;
 
-          if (gCurFile->cursor.is_selected &&
+          if (current_file->cursor.is_selected &&
               isPosSelected(i, j + col_offset, range)) {
             bg = HL_BG_SELECT;
           }
@@ -369,9 +370,9 @@ static void editorDrawRows(abuf* ab) {
       }
 
       // Add newline character when selected
-      if (gCurFile->cursor.is_selected && range.end_y > i &&
+      if (current_file->cursor.is_selected && range.end_y > i &&
           i >= range.start_y &&
-          gCurFile->row[i].rsize - gCurFile->col_offset < cols) {
+          current_file->row[i].rsize - current_file->col_offset < cols) {
         setColor(ab, editor.color_cfg.highlightBg[HL_BG_SELECT], 1);
         abufAppend(ab, " ");
       }
@@ -398,11 +399,11 @@ void editorRefreshScreen(void) {
 
   bool should_show_cursor = true;
   if (editor.state == EDIT_MODE) {
-    int row = (gCurFile->cursor.y - gCurFile->row_offset) + 2;
-    int col = (editorRowCxToRx(&gCurFile->row[gCurFile->cursor.y],
-                               gCurFile->cursor.x) -
-               gCurFile->col_offset) +
-              1 + gCurFile->lineno_width;
+    int row = (current_file->cursor.y - current_file->row_offset) + 2;
+    int col = (editorRowCxToRx(&current_file->row[current_file->cursor.y],
+                               current_file->cursor.x) -
+               current_file->col_offset) +
+              1 + current_file->lineno_width;
     if (row <= 1 || row > editor.screen_rows - 1 || col <= 1 ||
         col > editor.screen_cols ||
         row >= editor.screen_rows - editor.con_size) {
