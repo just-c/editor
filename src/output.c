@@ -9,7 +9,6 @@
 #include "config.h"
 #include "defines.h"
 #include "editor.h"
-#include "highlight.h"
 #include "os.h"
 #include "prompt.h"
 #include "select.h"
@@ -202,8 +201,7 @@ static void editorDrawStatusBar(abuf* ab) {
     lang_len = 0;
     pos_len = 0;
   } else {
-    const char* file_type =
-        current_file->syntax ? current_file->syntax->file_type : "Plain Text";
+    const char* file_type = "Plain Text";
     int row = current_file->cursor.y + 1;
     int col = editorRowCxToRx(&current_file->row[current_file->cursor.y],
                               current_file->cursor.x) +
@@ -289,7 +287,7 @@ static void editorDrawRows(abuf* ab) {
       rlen += current_file->col_offset;
 
       char* c = &current_file->row[i].data[col_offset];
-      uint8_t* hl = &(current_file->row[i].hl[col_offset]);
+
       uint8_t curr_fg = HL_BG_NORMAL;
       uint8_t curr_bg = HL_NORMAL;
 
@@ -310,8 +308,8 @@ static void editorDrawRows(abuf* ab) {
           rx++;
           j++;
         } else {
-          uint8_t fg = hl[j] & HL_FG_MASK;
-          uint8_t bg = hl[j] >> HL_FG_BITS;
+          uint8_t fg = HL_NORMAL;
+          uint8_t bg = HL_BG_NORMAL;
 
           if (current_file->cursor.is_selected &&
               isPosSelected(i, j + col_offset, range)) {
@@ -319,9 +317,6 @@ static void editorDrawRows(abuf* ab) {
           }
           if (CONVAR_GETINT(drawspace) && (c[j] == ' ' || c[j] == '\t')) {
             fg = HL_SPACE;
-          }
-          if (bg == HL_BG_TRAILING && !CONVAR_GETINT(trailing)) {
-            bg = HL_BG_NORMAL;
           }
 
           // Update color

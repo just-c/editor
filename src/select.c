@@ -128,7 +128,7 @@ void editorPasteText(const EditorClipboard* clipboard, int x, int y) {
     memcpy(&row->data[x], paste, paste_len);
     row->size += paste_len;
     row->data[row->size] = '\0';
-    editorUpdateRow(current_file, row);
+    editorUpdateRow(row);
     current_file->cursor.x += paste_len;
   } else {
     // First line
@@ -136,8 +136,8 @@ void editorPasteText(const EditorClipboard* clipboard, int x, int y) {
     CONVAR_GETINT(autoindent) = 0;
     editorInsertNewline();
     CONVAR_GETINT(autoindent) = auto_indent;
-    editorRowAppendString(current_file, &current_file->row[y],
-                          clipboard->data[0], strlen(clipboard->data[0]));
+    editorRowAppendString(&current_file->row[y], clipboard->data[0],
+                          strlen(clipboard->data[0]));
     // Middle
     for (size_t i = 1; i < clipboard->size - 1; i++) {
       editorInsertRow(current_file, y + i, clipboard->data[i],
@@ -153,7 +153,7 @@ void editorPasteText(const EditorClipboard* clipboard, int x, int y) {
     memcpy(row->data, paste, paste_len);
     row->size += paste_len;
     row->data[row->size] = '\0';
-    editorUpdateRow(current_file, row);
+    editorUpdateRow(row);
 
     current_file->cursor.y = y + clipboard->size - 1;
     current_file->cursor.x = paste_len;

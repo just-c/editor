@@ -4,13 +4,12 @@
 #include <string.h>
 
 #include "defines.h"
-#include "highlight.h"
+#include "editor.h"
 #include "unicode.h"
 #include "utils.h"
 
-void editorUpdateRow(EditorFile* file, EditorRow* row) {
+void editorUpdateRow(EditorRow* row) {
   row->rsize = editorRowCxToRx(row, row->size);
-  editorUpdateSyntax(file, row);
 }
 
 void editorInsertRow(EditorFile* file, int at, const char* s, size_t len) {
@@ -27,7 +26,7 @@ void editorInsertRow(EditorFile* file, int at, const char* s, size_t len) {
 
   file->row[at].hl = NULL;
   file->row[at].hl_open_comment = 0;
-  editorUpdateRow(file, &file->row[at]);
+  editorUpdateRow(&file->row[at]);
 
   file->num_rows++;
   file->lineno_width = getDigit(file->num_rows) + 2;
@@ -48,29 +47,28 @@ void editorDelRow(EditorFile* file, int at) {
   file->lineno_width = getDigit(file->num_rows) + 2;
 }
 
-void editorRowInsertChar(EditorFile* file, EditorRow* row, int at, int c) {
+void editorRowInsertChar(EditorRow* row, int at, int c) {
   if (at < 0 || at > row->size) at = row->size;
   row->data = realloc_s(row->data, row->size + 2);
   memmove(&row->data[at + 1], &row->data[at], row->size - at + 1);
   row->size++;
   row->data[at] = c;
-  editorUpdateRow(file, row);
+  editorUpdateRow(row);
 }
 
-void editorRowDelChar(EditorFile* file, EditorRow* row, int at) {
+void editorRowDelChar(EditorRow* row, int at) {
   if (at < 0 || at >= row->size) return;
   memmove(&row->data[at], &row->data[at + 1], row->size - at);
   row->size--;
-  editorUpdateRow(file, row);
+  editorUpdateRow(row);
 }
 
-void editorRowAppendString(EditorFile* file, EditorRow* row, const char* s,
-                           size_t len) {
+void editorRowAppendString(EditorRow* row, const char* s, size_t len) {
   row->data = realloc_s(row->data, row->size + len + 1);
   memcpy(&row->data[row->size], s, len);
   row->size += len;
   row->data[row->size] = '\0';
-  editorUpdateRow(file, row);
+  editorUpdateRow(row);
 }
 
 void editorInsertChar(int c) {
@@ -87,8 +85,7 @@ void editorInsertChar(int c) {
       idx++;
     }
   } else {
-    editorRowInsertChar(current_file,
-                        &current_file->row[current_file->cursor.y],
+    editorRowInsertChar(&current_file->row[current_file->cursor.y],
                         current_file->cursor.x, c);
     current_file->cursor.x++;
   }
@@ -117,26 +114,24 @@ void editorInsertNewline(void) {
       while (i < current_file->cursor.x &&
              (curr_row->data[i] == ' ' || curr_row->data[i] == '\t'))
         i++;
-      if (i != 0)
-        editorRowAppendString(current_file, new_row, curr_row->data, i);
+      if (i != 0) editorRowAppendString(new_row, curr_row->data, i);
       if (curr_row->data[current_file->cursor.x - 1] == ':' ||
           (curr_row->data[current_file->cursor.x - 1] == '{' &&
            curr_row->data[current_file->cursor.x] != '}')) {
         if (CONVAR_GETINT(whitespace)) {
           for (int j = 0; j < CONVAR_GETINT(tabsize); j++, i++)
-            editorRowAppendString(current_file, new_row, " ", 1);
+            editorRowAppendString(new_row, " ", 1);
         } else {
-          editorRowAppendString(current_file, new_row, "\t", 1);
+          editorRowAppendString(new_row, "\t", 1);
           i++;
         }
       }
     }
-    editorRowAppendString(current_file, new_row,
-                          &curr_row->data[current_file->cursor.x],
+    editorRowAppendString(new_row, &curr_row->data[current_file->cursor.x],
                           curr_row->size - current_file->cursor.x);
     curr_row->size = current_file->cursor.x;
     curr_row->data[curr_row->size] = '\0';
-    editorUpdateRow(current_file, curr_row);
+    editorUpdateRow(curr_row);
   }
   current_file->cursor.y++;
   current_file->cursor.x = i;
@@ -149,12 +144,11 @@ void editorDelChar(void) {
   if (current_file->cursor.x == 0 && current_file->cursor.y == 0) return;
   EditorRow* row = &current_file->row[current_file->cursor.y];
   if (current_file->cursor.x > 0) {
-    editorRowDelChar(current_file, row, current_file->cursor.x - 1);
+    editorRowDelChar(row, current_file->cursor.x - 1);
     current_file->cursor.x--;
   } else {
     current_file->cursor.x = current_file->row[current_file->cursor.y - 1].size;
-    editorRowAppendString(current_file,
-                          &current_file->row[current_file->cursor.y - 1],
+    editorRowAppendString(&current_file->row[current_file->cursor.y - 1],
                           row->data, row->size);
     editorDelRow(current_file, current_file->cursor.y);
     current_file->cursor.y--;

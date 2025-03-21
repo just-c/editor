@@ -7,7 +7,6 @@
 #include <string.h>
 
 #include "editor.h"
-#include "highlight.h"
 #include "input.h"
 #include "output.h"
 #include "prompt.h"
@@ -109,8 +108,6 @@ bool editorOpen(EditorFile* file, const char* path) {
   file->filename = malloc_s(path_len);
   memcpy(file->filename, full_path, path_len);
 
-  editorSelectSyntaxHighlight(file);
-
   file->dirty = 0;
 
   if (!fp) {
@@ -146,7 +143,7 @@ bool editorOpen(EditorFile* file, const char* path) {
 
     file->row[at].hl = NULL;
     file->row[at].hl_open_comment = 0;
-    editorUpdateRow(file, &file->row[at]);
+    editorUpdateRow(&file->row[at]);
 
     line = NULL;
     n = 0;
@@ -195,8 +192,6 @@ void editorSave(EditorFile* file, int save_as) {
     free(file->filename);
     file->filename = malloc_s(path_len);
     memcpy(file->filename, full_path, path_len);
-
-    editorSelectSyntaxHighlight(file);
   }
 
   size_t len;

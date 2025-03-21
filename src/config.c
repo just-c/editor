@@ -6,7 +6,6 @@
 
 #include "defines.h"
 #include "editor.h"
-#include "highlight.h"
 #include "input.h"
 #include "prompt.h"
 #include "terminal.h"
@@ -22,9 +21,7 @@ CONVAR(whitespace, "Use whitespace instead of tab.", "1", NULL);
 CONVAR(autoindent, "Enable auto indent.", "0", NULL);
 CONVAR(backspace, "Use hungry backspace.", "1", NULL);
 CONVAR(bracket, "Use auto bracket completion.", "0", NULL);
-CONVAR(trailing, "Highlight trailing spaces.", "1", NULL);
 CONVAR(drawspace, "Render whitespace and tab.", "0", NULL);
-CONVAR(syntax, "Enable syntax highlight.", "1", cvarSyntaxCallback);
 CONVAR(helpinfo, "Show the help information.", "1", NULL);
 CONVAR(ignorecase, "Use case insensitive search. Set to 2 to use smart case.",
        "2", NULL);
@@ -36,7 +33,7 @@ CONVAR(cmd_expand_depth, "Max depth for alias expansion.", "1024", NULL);
 static void reloadSyntax(void) {
   for (int i = 0; i < editor.file_count; i++) {
     for (int j = 0; j < editor.files[i].num_rows; j++) {
-      editorUpdateRow(&editor.files[i], &editor.files[i].row[j]);
+      editorUpdateRow(&editor.files[i].row[j]);
     }
   }
 }
@@ -143,72 +140,6 @@ CON_COMMAND(exec, "Execute a config file.") {
       return;
     }
   }
-}
-
-CON_COMMAND(lang, "Set the syntax highlighting language of the current file.") {
-  if (args.argc != 2) {
-    editorMsg("Usage: lang <name>");
-    return;
-  }
-
-  if (editor.file_count == 0) {
-    editorMsg("lang: No file opened");
-    return;
-  }
-
-  const char* name = args.argv[1];
-  for (EditorSyntax* s = editor.HLDB; s; s = s->next) {
-    // Match the language name or the externaion
-    if (strCaseCmp(name, s->file_type) == 0) {
-      editorSetSyntaxHighlight(current_file, s);
-      return;
-    }
-
-    for (size_t i = 0; i < s->file_exts.size; i++) {
-      int is_ext = (s->file_exts.data[i][0] == '.');
-      if ((is_ext && strCaseCmp(name, &s->file_exts.data[i][1]) == 0) ||
-          (!is_ext && strCaseStr(name, s->file_exts.data[i]))) {
-        editorSetSyntaxHighlight(current_file, s);
-        return;
-      }
-    }
-  }
-
-  editorMsg("lang: \"%s\" not found", name);
-}
-
-CON_COMMAND(hldb_load, "Load a syntax highlighting JSON file.") {
-  if (args.argc != 2) {
-    editorMsg("Usage: hldb_load <json file>");
-    return;
-  }
-
-  char filename[EDITOR_PATH_MAX] = {0};
-  snprintf(filename, sizeof(filename), "%s", args.argv[1]);
-  addDefaultExtension(filename, ".json", sizeof(filename));
-
-  if (!editorLoadHLDB(filename)) {
-    // Try config directory
-    char config_path[EDITOR_PATH_MAX];
-    int len =
-        snprintf(config_path, sizeof(config_path),
-                 PATH_CAT("%s", CONF_DIR, "%s"), getenv(ENV_HOME), filename);
-
-    if (len < 0 || !editorLoadHLDB(config_path)) {
-      editorMsg("hldb_load: Failed to load \"%s\"", args.argv[1]);
-      return;
-    }
-  }
-
-  reloadSyntax();
-}
-
-CON_COMMAND(hldb_reload_all, "Reload syntax highlighting database.") {
-  UNUSED(args.argc);
-
-  editorFreeHLDB();
-  editorInitHLDB();
-  reloadSyntax();
 }
 
 CON_COMMAND(newline, "Set the EOL sequence (LF/CRLF).") {
@@ -629,18 +560,13 @@ void editorInitConfig(void) {
   INIT_CONVAR(autoindent);
   INIT_CONVAR(backspace);
   INIT_CONVAR(bracket);
-  INIT_CONVAR(trailing);
   INIT_CONVAR(drawspace);
-  INIT_CONVAR(syntax);
   INIT_CONVAR(helpinfo);
   INIT_CONVAR(ignorecase);
   INIT_CONVAR(mouse);
   INIT_CONVAR(osc52_copy);
 
   INIT_CONCOMMAND(color);
-  INIT_CONCOMMAND(lang);
-  INIT_CONCOMMAND(hldb_load);
-  INIT_CONCOMMAND(hldb_reload_all);
   INIT_CONCOMMAND(newline);
 
   INIT_CONVAR(cmd_expand_depth);

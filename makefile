@@ -9,13 +9,12 @@ DEBUG_FLAGS = -Og -g3 -D_DEBUG
 # Directories and files
 SOURCE_FILES = $(wildcard src/*.c)
 OBJECT_FILES = $(SOURCE_FILES:src/%.c=%.o)
-SYNTAX_FILES = $(wildcard resources/syntax/*.json)
 
 # Default target
 all: release/nino
 
 # Release build
-release/nino: resources/bundle.h $(addprefix release/, $(OBJECT_FILES))
+release/nino: $(addprefix release/, $(OBJECT_FILES))
 	@mkdir -p release
 	$(COMPILER) $(COMPILER_FLAGS) $(RELEASE_FLAGS) -o $@ $^
 
@@ -26,7 +25,7 @@ release/%.o: src/%.c
 # Debug build
 debug: debug/nino
 
-debug/nino: resources/bundle.h $(addprefix debug/, $(OBJECT_FILES))
+debug/nino: $(addprefix debug/, $(OBJECT_FILES))
 	@mkdir -p debug
 	$(COMPILER) $(COMPILER_FLAGS) $(DEBUG_FLAGS) -o $@ $^
 
@@ -34,16 +33,9 @@ debug/%.o: src/%.c
 	@mkdir -p debug
 	$(COMPILER) -c $(COMPILER_FLAGS) $(DEBUG_FLAGS) -o $@ $<
 
-# Bundle generation
-resources/bundle.h: resources/bundler
-	resources/bundler resources/bundle.h $(SYNTAX_FILES)
-
-resources/bundler: resources/bundler.c
-	$(COMPILER) -o $@ $<
-
 # Clean target
 clean:
-	rm -rf release debug resources/bundler resources/bundle.h
+	rm -rf release debug
 
 # Install target
 install: release/nino

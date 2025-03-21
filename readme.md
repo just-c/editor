@@ -5,7 +5,6 @@ A small terminal-based text editor written in C.
 ## Features
 
 - Common keybindings
-- Syntax highlighting
 - UTF-8 support
 - Automatic indentation
 - Bracket completion
@@ -61,18 +60,13 @@ configuration directory.
 | autoindent       | 0       | Enable auto indent.                                                 |
 | backspace        | 1       | Use hungry backspace.                                               |
 | bracket          | 0       | Use auto bracket completion.                                        |
-| trailing         | 1       | Highlight trailing spaces.                                          |
 | drawspace        | 1       | Render whitespace and tab.                                          |
-| syntax           | 1       | Enable syntax highlight.                                            |
 | helpinfo         | 1       | Show the help information.                                          |
 | ignorecase       | 2       | Use case insensitive search. Set to 2 to use smart case.            |
 | mouse            | 1       | Enable mouse mode.                                                  |
 | osc52_copy       | 1       | Copy to system clipboard using OSC52.                               |
 | color            | cmd     | Change the color of an element.                                     |
 | exec             | cmd     | Execute a config file.                                              |
-| lang             | cmd     | Set the syntax highlighting language of the current file.           |
-| hldb_load        | cmd     | Load a syntax highlighting JSON file.                               |
-| hldb_reload_all  | cmd     | Reload syntax highlighting database.                                |
 | newline          | cmd     | Set the EOL sequence (LF/CRLF).                                     |
 | alias            | cmd     | Alias a command.                                                    |
 | unalias          | cmd     | Remove an alias.                                                    |
@@ -120,47 +114,6 @@ When color code is `000000` it will be transparent.
 | hl.match       | 592e14  |
 | hl.select      | 264f78  |
 | hl.trailing    | ff6464  |
-
-## Syntax Highlighting
-
-nino supports simple keywords syntax highlighting.
-
-Enable syntax highlighting with command `syntax 1`.
-
-If you would like to make your own syntax files, you can put them in:
-
-- `~/.config/nino/syntax`
-
-Syntax highlighting data are stored in JSON files.
-
-```JSON
-{
-    "name" : "Example language",
-    "extensions" : [
-        ".extension1",
-        ".extension2"
-    ],
-    "comment": "//",
-    "multiline-comment": [
-        "/*",
-        "*/"
-    ],
-    "keywords1": [
-        "for",
-        "while",
-        "if",
-        "else"
-    ],
-    "keywords2": [
-        "int",
-        "char",
-        "float"
-    ],
-    "keywords3": [
-        "string"
-    ]
-}
-```
 
 ## Controls
 
@@ -219,15 +172,6 @@ Syntax highlighting data are stored in JSON files.
 
 The terminal emulator might have some keybinds overlapping with nino, make sure
 to change them before using.
-
-## Resource files
-
-## Syntax
-
-Files in the resources folder will be bundled in the binary for portability.
-If you would like to make your own syntax files, you can put them in:
-
-- `~/.config/nino/syntax`
 
 ## Themes
 

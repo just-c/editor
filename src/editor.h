@@ -47,9 +47,6 @@ typedef struct EditorFile {
   // Text buffers
   EditorRow* row;
 
-  // Syntax highlight information
-  EditorSyntax* syntax;
-
   // Undo redo
   EditorActionList* action_head;
   EditorActionList* action_current;
@@ -86,9 +83,6 @@ typedef struct Editor {
   int file_index;
   int tab_offset;
   int tab_displayed;
-
-  // Syntax highlight
-  EditorSyntax* HLDB;
 
   // Console
   int con_front;

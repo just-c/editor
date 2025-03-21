@@ -4,7 +4,6 @@
 #include <string.h>
 
 #include "defines.h"
-#include "highlight.h"
 #include "output.h"
 #include "prompt.h"
 #include "terminal.h"
@@ -23,7 +22,6 @@ void editorInit(void) {
 
   editorInitTerminal();
   editorInitConfig();
-  editorInitHLDB();
 
   // Draw loading
   memset(&editor.files[0], 0, sizeof(EditorFile));
@@ -36,7 +34,6 @@ void editorFree(void) {
     editorFreeFile(&editor.files[i]);
   }
   editorFreeClipboardContent(&editor.clipboard);
-  editorFreeHLDB();
   editorFreeConfig();
 }
 
