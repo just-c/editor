@@ -2,7 +2,7 @@
 
 # Compiler and flags
 COMPILER = gcc
-COMPILER_FLAGS = -pedantic -std=c11 -Wall -Wextra
+COMPILER_FLAGS = -pedantic -std=c11 -Wall -Wextra -D__USE_MUSL
 RELEASE_FLAGS = -O2 -DNDEBUG
 DEBUG_FLAGS = -Og -g3 -D_DEBUG
 
