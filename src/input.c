@@ -541,27 +541,8 @@ void editorProcessKeypress(void) {
 
       if (should_delete_bracket) editorMoveCursor(ARROW_LEFT);
 
-      char deleted_char = '\0';
-      if (current_file->cursor.x != 0)
-        deleted_char = current_file->row[current_file->cursor.y]
-                           .data[current_file->cursor.x - 1];
       editorMoveCursor(ARROW_LEFT);
-      if (CONVAR_GETINT(backspace) && deleted_char == ' ') {
-        bool should_delete_tab = true;
-        for (int i = 0; i < current_file->cursor.x; i++) {
-          if (!isspace(current_file->row[current_file->cursor.y].data[i])) {
-            should_delete_tab = false;
-          }
-        }
-        if (should_delete_tab) {
-          int idx = editorRowCxToRx(&current_file->row[current_file->cursor.y],
-                                    current_file->cursor.x);
-          while (idx % CONVAR_GETINT(tabsize) != 0) {
-            editorMoveCursor(ARROW_LEFT);
-            idx--;
-          }
-        }
-      }
+
       edit->deleted_range.start_x = current_file->cursor.x;
       edit->deleted_range.start_y = current_file->cursor.y;
       editorCopyText(&edit->deleted_text, edit->deleted_range);

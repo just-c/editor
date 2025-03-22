@@ -19,7 +19,6 @@ static void cvarMouseCallback(void);
 CONVAR(tabsize, "Tab size.", "4", cvarSyntaxCallback);
 CONVAR(whitespace, "Use whitespace instead of tab.", "1", NULL);
 CONVAR(autoindent, "Enable auto indent.", "0", NULL);
-CONVAR(backspace, "Use hungry backspace.", "1", NULL);
 CONVAR(bracket, "Use auto bracket completion.", "0", NULL);
 CONVAR(helpinfo, "Show the help information.", "1", NULL);
 CONVAR(ignorecase, "Use case insensitive search. Set to 2 to use smart case.",
@@ -557,7 +556,6 @@ void editorInitConfig(void) {
   INIT_CONVAR(tabsize);
   INIT_CONVAR(whitespace);
   INIT_CONVAR(autoindent);
-  INIT_CONVAR(backspace);
   INIT_CONVAR(bracket);
   INIT_CONVAR(helpinfo);
   INIT_CONVAR(ignorecase);
