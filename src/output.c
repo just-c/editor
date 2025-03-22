@@ -315,9 +315,6 @@ static void editorDrawRows(abuf* ab) {
               isPosSelected(i, j + col_offset, range)) {
             bg = HL_BG_SELECT;
           }
-          if (CONVAR_GETINT(drawspace) && (c[j] == ' ' || c[j] == '\t')) {
-            fg = HL_SPACE;
-          }
 
           // Update color
           if (fg != curr_fg) {
@@ -330,12 +327,7 @@ static void editorDrawRows(abuf* ab) {
           }
 
           if (c[j] == '\t') {
-            if (CONVAR_GETINT(drawspace)) {
-              abufAppend(ab, "|");
-            } else {
-              abufAppend(ab, " ");
-            }
-
+            abufAppend(ab, " ");
             rx++;
             while (rx % CONVAR_GETINT(tabsize) != 0 && rx < rlen) {
               abufAppend(ab, " ");
@@ -343,11 +335,7 @@ static void editorDrawRows(abuf* ab) {
             }
             j++;
           } else if (c[j] == ' ') {
-            if (CONVAR_GETINT(drawspace)) {
-              abufAppend(ab, ".");
-            } else {
-              abufAppend(ab, " ");
-            }
+            abufAppend(ab, " ");
             rx++;
             j++;
           } else {

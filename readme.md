@@ -60,7 +60,6 @@ configuration directory.
 | autoindent       | 0       | Enable auto indent.                                                 |
 | backspace        | 1       | Use hungry backspace.                                               |
 | bracket          | 0       | Use auto bracket completion.                                        |
-| drawspace        | 1       | Render whitespace and tab.                                          |
 | helpinfo         | 1       | Show the help information.                                          |
 | ignorecase       | 2       | Use case insensitive search. Set to 2 to use smart case.            |
 | mouse            | 1       | Enable mouse mode.                                                  |

@@ -21,7 +21,6 @@ CONVAR(whitespace, "Use whitespace instead of tab.", "1", NULL);
 CONVAR(autoindent, "Enable auto indent.", "0", NULL);
 CONVAR(backspace, "Use hungry backspace.", "1", NULL);
 CONVAR(bracket, "Use auto bracket completion.", "0", NULL);
-CONVAR(drawspace, "Render whitespace and tab.", "0", NULL);
 CONVAR(helpinfo, "Show the help information.", "1", NULL);
 CONVAR(ignorecase, "Use case insensitive search. Set to 2 to use smart case.",
        "2", NULL);
@@ -560,7 +559,6 @@ void editorInitConfig(void) {
   INIT_CONVAR(autoindent);
   INIT_CONVAR(backspace);
   INIT_CONVAR(bracket);
-  INIT_CONVAR(drawspace);
   INIT_CONVAR(helpinfo);
   INIT_CONVAR(ignorecase);
   INIT_CONVAR(mouse);
