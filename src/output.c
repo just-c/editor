@@ -190,7 +190,7 @@ static void editorDrawStatusBar(abuf* ab) {
       " ^Q: Cancel",
       " ^Q: Cancel",
   };
-  if (CONVAR_GETINT(helpinfo)) help_str = help_info[editor.state];
+  help_str = help_info[editor.state];
 
   char lang[16];
   char pos[64];

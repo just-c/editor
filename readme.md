@@ -56,7 +56,6 @@ the file in the current directory, then the configuration directory.
 | whitespace       | 1       | Use whitespace instead of tab.                           |
 | autoindent       | 0       | Enable auto indent.                                      |
 | bracket          | 0       | Use auto bracket completion.                             |
-| helpinfo         | 1       | Show the help information.                               |
 | ignorecase       | 2       | Use case insensitive search. Set to 2 to use smart case. |
 | mouse            | 1       | Enable mouse mode.                                       |
 | osc52_copy       | 1       | Copy to system clipboard using OSC52.                    |

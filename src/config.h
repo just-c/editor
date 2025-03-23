@@ -12,7 +12,6 @@ extern EditorConCmd cvar_tabsize;
 extern EditorConCmd cvar_whitespace;
 extern EditorConCmd cvar_autoindent;
 extern EditorConCmd cvar_bracket;
-extern EditorConCmd cvar_helpinfo;
 extern EditorConCmd cvar_ignorecase;
 extern EditorConCmd cvar_mouse;
 extern EditorConCmd cvar_osc52_copy;
