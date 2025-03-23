@@ -141,8 +141,6 @@ bool editorOpen(EditorFile* file, const char* path) {
     file->row[at].size = len;
     file->row[at].data = line;
 
-    file->row[at].hl = NULL;
-    file->row[at].hl_open_comment = 0;
     editorUpdateRow(&file->row[at]);
 
     line = NULL;

@@ -12,8 +12,6 @@ typedef struct EditorRow {
   int size;
   int rsize;
   char* data;
-  uint8_t* hl;
-  int hl_open_comment;
 } EditorRow;
 
 void editorUpdateRow(EditorRow* row);

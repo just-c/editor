@@ -24,18 +24,13 @@ void editorInsertRow(EditorFile* file, int at, const char* s, size_t len) {
   memcpy(file->row[at].data, s, len);
   file->row[at].data[len] = '\0';
 
-  file->row[at].hl = NULL;
-  file->row[at].hl_open_comment = 0;
   editorUpdateRow(&file->row[at]);
 
   file->num_rows++;
   file->lineno_width = getDigit(file->num_rows) + 2;
 }
 
-void editorFreeRow(EditorRow* row) {
-  free(row->data);
-  free(row->hl);
-}
+void editorFreeRow(EditorRow* row) { free(row->data); }
 
 void editorDelRow(EditorFile* file, int at) {
   if (at < 0 || at >= file->num_rows) return;
