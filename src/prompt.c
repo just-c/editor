@@ -306,21 +306,7 @@ static void editorFindCallback(char* query, int key) {
       char* match = NULL;
       int col = 0;
       char* (*search_func)(const char*, const char*) = &strstr;
-
-      if (CONVAR_GETINT(ignorecase) == 1) {
-        search_func = &strCaseStr;
-      } else if (CONVAR_GETINT(ignorecase) == 2) {
-        bool has_upper = false;
-        for (size_t j = 0; j < len; j++) {
-          if (isupper(query[j])) {
-            has_upper = true;
-            break;
-          }
-        }
-        if (!has_upper) {
-          search_func = &strCaseStr;
-        }
-      }
+      search_func = &strCaseStr;
 
       while ((match = (*search_func)(&current_file->row[i].data[col], query)) !=
              0) {
