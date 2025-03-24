@@ -50,23 +50,20 @@ the file in the current directory, then the configuration directory.
 
 ## Commands and ConVars
 
-| Name             | Default | Description                               |
-| ---------------- | ------- | ----------------------------------------- |
-| tabsize          | 4       | Tab size.                                 |
-| whitespace       | 1       | Use whitespace instead of tab.            |
-| autoindent       | 0       | Enable auto indent.                       |
-| bracket          | 0       | Use auto bracket completion.              |
-| mouse            | 1       | Enable mouse mode.                        |
-| osc52_copy       | 1       | Copy to system clipboard using OSC52.     |
-| color            | cmd     | Change the color of an element.           |
-| exec             | cmd     | Execute a config file.                    |
-| newline          | cmd     | Set the EOL sequence (LF/CRLF).           |
-| alias            | cmd     | Alias a command.                          |
-| unalias          | cmd     | Remove an alias.                          |
-| cmd_expand_depth | 1024    | Max depth for alias expansion.            |
-| echo             | cmd     | Clear all console output.                 |
-| help             | cmd     | Find help about a convar/concommand.      |
-| find             | cmd     | Find concommands by their name/help text. |
+| Name       | Default | Description                               |
+| ---------- | ------- | ----------------------------------------- |
+| tabsize    | 4       | Tab size.                                 |
+| whitespace | 1       | Use whitespace instead of tab.            |
+| autoindent | 0       | Enable auto indent.                       |
+| bracket    | 0       | Use auto bracket completion.              |
+| mouse      | 1       | Enable mouse mode.                        |
+| osc52_copy | 1       | Copy to system clipboard using OSC52.     |
+| color      | cmd     | Change the color of an element.           |
+| exec       | cmd     | Execute a config file.                    |
+| newline    | cmd     | Set the EOL sequence (LF/CRLF).           |
+| echo       | cmd     | Clear all console output.                 |
+| help       | cmd     | Find help about a convar/concommand.      |
+| find       | cmd     | Find concommands by their name/help text. |
 
 ## Color
 

@@ -23,8 +23,6 @@ CONVAR(bracket, "Use auto bracket completion.", "0", NULL);
 CONVAR(mouse, "Enable mouse mode.", "1", cvarMouseCallback);
 CONVAR(osc52_copy, "Copy to system clipboard using OSC52.", "1", NULL);
 
-CONVAR(cmd_expand_depth, "Max depth for alias expansion.", "1024", NULL);
-
 static void reloadSyntax(void) {
   for (int i = 0; i < editor.file_count; i++) {
     for (int j = 0; j < editor.files[i].num_rows; j++) {
@@ -316,124 +314,7 @@ const EditorColorScheme color_default = {
         },
 };
 
-#define MAX_ALIAS_NAME 32
-
-typedef struct CmdAlias CmdAlias;
-struct CmdAlias {
-  CmdAlias* next;
-  char name[MAX_ALIAS_NAME];
-  char* value;
-};
-
-static CmdAlias* cmd_alias = NULL;
-
-static CmdAlias* findAlias(const char* name) {
-  CmdAlias* a = cmd_alias;
-  while (a) {
-    if (strCaseCmp(name, a->name) == 0) {
-      break;
-    }
-    a = a->next;
-  }
-
-  return a;
-}
-
-CON_COMMAND(alias, "Alias a command.") {
-  if (args.argc < 2) {
-    editorMsg("Usage: alias <name> [value]");
-    return;
-  }
-
-  char* s = args.argv[1];
-  if (strlen(s) >= MAX_ALIAS_NAME) {
-    editorMsg("Alias name is too long");
-    return;
-  }
-
-  // If the alias already exists, reuse it
-  CmdAlias* a = findAlias(s);
-  if (args.argc == 2) {
-    if (!a) {
-      editorMsg("\"%s\" is not aliased", s);
-    } else {
-      editorMsg("\"%s\" = \"%s\"", s, a->value);
-    }
-    return;
-  }
-
-  if (!a) {
-    a = malloc_s(sizeof(CmdAlias));
-    a->next = cmd_alias;
-    cmd_alias = a;
-  } else {
-    free(a->value);
-  }
-
-  strcpy(a->name, s);
-
-  // Copy the rest of the command line
-  int total_len = 0;
-  char cmd[COMMAND_MAX_LENGTH];
-  memset(cmd, 0, sizeof(cmd));
-
-  for (int i = 2; i < args.argc; i++) {
-    int arg_len = strlen(args.argv[i]);
-    if (total_len + arg_len + 1 <= COMMAND_MAX_LENGTH) {
-      if (i > 2) {
-        strcat(cmd, " ");
-        total_len++;
-      }
-      strcat(cmd, args.argv[i]);
-      total_len += arg_len;
-    } else {
-      break;
-    }
-  }
-
-  size_t size = total_len + 1;
-  a->value = malloc_s(size);
-  snprintf(a->value, size, "%s", cmd);
-}
-
-CON_COMMAND(unalias, "Remove an alias.") {
-  if (args.argc != 2) {
-    editorMsg("Usage: unalias <name>");
-    return;
-  }
-
-  const char* s = args.argv[1];
-
-  if (!cmd_alias) {
-    editorMsg("%s not found", s);
-    return;
-  }
-
-  if (strCaseCmp(cmd_alias->name, s) == 0) {
-    CmdAlias* temp = cmd_alias;
-    cmd_alias = cmd_alias->next;
-    free(temp->value);
-    free(temp);
-    return;
-  }
-
-  CmdAlias* a = cmd_alias;
-  while (a->next && strCaseCmp(a->next->name, s) != 0) {
-    a = a->next;
-  }
-
-  if (!a->next) {
-    editorMsg("%s not found", s);
-    return;
-  }
-
-  CmdAlias* temp = a->next;
-  a->next = a->next->next;
-  free(temp->value);
-  free(temp);
-}
-
-static void parseLine(const char* cmd, int depth);
+static void parseLine(const char* cmd);
 
 static void cvarCmdCallback(EditorConCmd* cmd) {
   if (args.argc < 2) {
@@ -443,18 +324,12 @@ static void cvarCmdCallback(EditorConCmd* cmd) {
   editorSetConVar(&cmd->cvar, args.argv[1]);
 }
 
-static void executeCommand(int depth) {
+static void executeCommand() {
   if (args.argc < 1) return;
 
   if (args.argc > COMMAND_MAX_ARGC) {
     editorMsg("Command overflows the argument buffer. Clamped!");
     args.argc = COMMAND_MAX_ARGC;
-  }
-
-  CmdAlias* a = findAlias(args.argv[0]);
-  if (a) {
-    parseLine(a->value, depth + 1);
-    return;
   }
 
   EditorConCmd* cmd = editorFindCmd(args.argv[0]);
@@ -477,12 +352,7 @@ static void resetArgs() {
   args.argc = 0;
 }
 
-static void parseLine(const char* cmd, int depth) {
-  if (depth > CONVAR_GETINT(cmd_expand_depth)) {
-    editorMsg("Reached max alias expansion depth.");
-    return;
-  }
-
+static void parseLine(const char* cmd) {
   // Command line parsing
   resetArgs();
   while (*cmd != '\0' && *cmd != '#') {
@@ -493,7 +363,7 @@ static void parseLine(const char* cmd, int depth) {
         break;
 
       case ';':
-        executeCommand(depth);
+        executeCommand();
         resetArgs();
         cmd++;
         break;
@@ -532,7 +402,7 @@ static void parseLine(const char* cmd, int depth) {
     }
   }
 
-  executeCommand(depth);
+  executeCommand();
 }
 
 bool editorLoadConfig(const char* path) {
@@ -542,7 +412,7 @@ bool editorLoadConfig(const char* path) {
   char buf[COMMAND_MAX_LENGTH] = {0};
   while (fgets(buf, sizeof(buf), fp)) {
     buf[strcspn(buf, "\r\n")] = '\0';
-    parseLine(buf, 0);
+    parseLine(buf);
   }
   fclose(fp);
   return true;
@@ -560,9 +430,6 @@ void editorInitConfig(void) {
   INIT_CONCOMMAND(color);
   INIT_CONCOMMAND(newline);
 
-  INIT_CONVAR(cmd_expand_depth);
-  INIT_CONCOMMAND(alias);
-  INIT_CONCOMMAND(unalias);
   INIT_CONCOMMAND(exec);
   INIT_CONCOMMAND(echo);
   INIT_CONCOMMAND(clear);
@@ -583,25 +450,14 @@ void editorInitConfig(void) {
   }
 }
 
-void editorFreeConfig(void) {
-  CmdAlias* a = cmd_alias;
-
-  while (a) {
-    CmdAlias* temp = a;
-    a = a->next;
-    free(temp->value);
-    free(temp);
-  }
-
-  resetArgs();
-}
+void editorFreeConfig(void) { resetArgs(); }
 
 void editorOpenConfigPrompt(void) {
   char* query = editorPrompt("Prompt: %s", CONFIG_MODE, NULL);
   if (query == NULL) return;
 
   editorMsgClear();
-  parseLine(query, 0);
+  parseLine(query);
   free(query);
 }
 
