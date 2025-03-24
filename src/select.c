@@ -172,8 +172,6 @@ void editorFreeClipboardContent(EditorClipboard* clipboard) {
 }
 
 void editorCopyToSysClipboard(EditorClipboard* clipboard) {
-  if (!CONVAR_GETINT(osc52_copy)) return;
-
   if (!clipboard || !clipboard->size) return;
 
   abuf ab = ABUF_INIT;

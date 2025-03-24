@@ -20,7 +20,6 @@ CONVAR(tabsize, "Tab size.", "4", cvarSyntaxCallback);
 CONVAR(autoindent, "Enable auto indent.", "0", NULL);
 CONVAR(bracket, "Use auto bracket completion.", "0", NULL);
 CONVAR(mouse, "Enable mouse mode.", "1", cvarMouseCallback);
-CONVAR(osc52_copy, "Copy to system clipboard using OSC52.", "1", NULL);
 
 static void reloadSyntax(void) {
   for (int i = 0; i < editor.file_count; i++) {
@@ -423,7 +422,6 @@ void editorInitConfig(void) {
   INIT_CONVAR(autoindent);
   INIT_CONVAR(bracket);
   INIT_CONVAR(mouse);
-  INIT_CONVAR(osc52_copy);
 
   INIT_CONCOMMAND(color);
   INIT_CONCOMMAND(newline);

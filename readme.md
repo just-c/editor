@@ -56,7 +56,6 @@ the file in the current directory, then the configuration directory.
 | autoindent | 0       | Enable auto indent.                       |
 | bracket    | 0       | Use auto bracket completion.              |
 | mouse      | 1       | Enable mouse mode.                        |
-| osc52_copy | 1       | Copy to system clipboard using OSC52.     |
 | color      | cmd     | Change the color of an element.           |
 | exec       | cmd     | Execute a config file.                    |
 | newline    | cmd     | Set the EOL sequence (LF/CRLF).           |
