@@ -50,17 +50,16 @@ the file in the current directory, then the configuration directory.
 
 ## Commands and ConVars
 
-| Name       | Default | Description                               |
-| ---------- | ------- | ----------------------------------------- |
-| tabsize    | 4       | Tab size.                                 |
-| autoindent | 0       | Enable auto indent.                       |
-| bracket    | 0       | Use auto bracket completion.              |
-| color      | cmd     | Change the color of an element.           |
-| exec       | cmd     | Execute a config file.                    |
-| newline    | cmd     | Set the EOL sequence (LF/CRLF).           |
-| echo       | cmd     | Clear all console output.                 |
-| help       | cmd     | Find help about a convar/concommand.      |
-| find       | cmd     | Find concommands by their name/help text. |
+| Name    | Default | Description                               |
+| ------- | ------- | ----------------------------------------- |
+| tabsize | 4       | Tab size.                                 |
+| bracket | 0       | Use auto bracket completion.              |
+| color   | cmd     | Change the color of an element.           |
+| exec    | cmd     | Execute a config file.                    |
+| newline | cmd     | Set the EOL sequence (LF/CRLF).           |
+| echo    | cmd     | Clear all console output.                 |
+| help    | cmd     | Find help about a convar/concommand.      |
+| find    | cmd     | Find concommands by their name/help text. |
 
 ## Color
 

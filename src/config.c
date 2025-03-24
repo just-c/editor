@@ -16,7 +16,6 @@ EditorConCmdArgs args;
 static void cvarSyntaxCallback(void);
 
 CONVAR(tabsize, "Tab size.", "4", cvarSyntaxCallback);
-CONVAR(autoindent, "Enable auto indent.", "0", NULL);
 CONVAR(bracket, "Use auto bracket completion.", "0", NULL);
 
 static void reloadSyntax(void) {
@@ -406,7 +405,6 @@ bool editorLoadConfig(const char* path) {
 void editorInitConfig(void) {
   // Init commands
   INIT_CONVAR(tabsize);
-  INIT_CONVAR(autoindent);
   INIT_CONVAR(bracket);
 
   INIT_CONCOMMAND(color);

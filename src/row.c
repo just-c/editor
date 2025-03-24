@@ -94,18 +94,6 @@ void editorInsertNewline(void) {
     editorInsertRow(current_file, current_file->cursor.y + 1, "", 0);
     EditorRow* curr_row = &current_file->row[current_file->cursor.y];
     EditorRow* new_row = &current_file->row[current_file->cursor.y + 1];
-    if (CONVAR_GETINT(autoindent)) {
-      while (i < current_file->cursor.x &&
-             (curr_row->data[i] == ' ' || curr_row->data[i] == '\t'))
-        i++;
-      if (i != 0) editorRowAppendString(new_row, curr_row->data, i);
-      if (curr_row->data[current_file->cursor.x - 1] == ':' ||
-          (curr_row->data[current_file->cursor.x - 1] == '{' &&
-           curr_row->data[current_file->cursor.x] != '}')) {
-        editorRowAppendString(new_row, "\t", 1);
-        i++;
-      }
-    }
     editorRowAppendString(new_row, &curr_row->data[current_file->cursor.x],
                           curr_row->size - current_file->cursor.x);
     curr_row->size = current_file->cursor.x;

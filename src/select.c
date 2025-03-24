@@ -132,10 +132,7 @@ void editorPasteText(const EditorClipboard* clipboard, int x, int y) {
     current_file->cursor.x += paste_len;
   } else {
     // First line
-    int auto_indent = CONVAR_GETINT(autoindent);
-    CONVAR_GETINT(autoindent) = 0;
     editorInsertNewline();
-    CONVAR_GETINT(autoindent) = auto_indent;
     editorRowAppendString(&current_file->row[y], clipboard->data[0],
                           strlen(clipboard->data[0]));
     // Middle
