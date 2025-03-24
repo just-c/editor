@@ -53,7 +53,6 @@ the file in the current directory, then the configuration directory.
 | Name       | Default | Description                               |
 | ---------- | ------- | ----------------------------------------- |
 | tabsize    | 4       | Tab size.                                 |
-| whitespace | 1       | Use whitespace instead of tab.            |
 | autoindent | 0       | Enable auto indent.                       |
 | bracket    | 0       | Use auto bracket completion.              |
 | mouse      | 1       | Enable mouse mode.                        |

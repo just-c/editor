@@ -17,7 +17,6 @@ static void cvarSyntaxCallback(void);
 static void cvarMouseCallback(void);
 
 CONVAR(tabsize, "Tab size.", "4", cvarSyntaxCallback);
-CONVAR(whitespace, "Use whitespace instead of tab.", "1", NULL);
 CONVAR(autoindent, "Enable auto indent.", "0", NULL);
 CONVAR(bracket, "Use auto bracket completion.", "0", NULL);
 CONVAR(mouse, "Enable mouse mode.", "1", cvarMouseCallback);
@@ -421,7 +420,6 @@ bool editorLoadConfig(const char* path) {
 void editorInitConfig(void) {
   // Init commands
   INIT_CONVAR(tabsize);
-  INIT_CONVAR(whitespace);
   INIT_CONVAR(autoindent);
   INIT_CONVAR(bracket);
   INIT_CONVAR(mouse);

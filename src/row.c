@@ -70,20 +70,9 @@ void editorInsertChar(int c) {
   if (current_file->cursor.y == current_file->num_rows) {
     editorInsertRow(current_file, current_file->num_rows, "", 0);
   }
-  if (c == '\t' && CONVAR_GETINT(whitespace)) {
-    int idx = editorRowCxToRx(&current_file->row[current_file->cursor.y],
-                              current_file->cursor.x) +
-              1;
-    editorInsertChar(' ');
-    while (idx % CONVAR_GETINT(tabsize) != 0) {
-      editorInsertChar(' ');
-      idx++;
-    }
-  } else {
-    editorRowInsertChar(&current_file->row[current_file->cursor.y],
-                        current_file->cursor.x, c);
-    current_file->cursor.x++;
-  }
+  editorRowInsertChar(&current_file->row[current_file->cursor.y],
+                      current_file->cursor.x, c);
+  current_file->cursor.x++;
 }
 
 void editorInsertUnicode(uint32_t unicode) {
@@ -113,13 +102,8 @@ void editorInsertNewline(void) {
       if (curr_row->data[current_file->cursor.x - 1] == ':' ||
           (curr_row->data[current_file->cursor.x - 1] == '{' &&
            curr_row->data[current_file->cursor.x] != '}')) {
-        if (CONVAR_GETINT(whitespace)) {
-          for (int j = 0; j < CONVAR_GETINT(tabsize); j++, i++)
-            editorRowAppendString(new_row, " ", 1);
-        } else {
-          editorRowAppendString(new_row, "\t", 1);
-          i++;
-        }
+        editorRowAppendString(new_row, "\t", 1);
+        i++;
       }
     }
     editorRowAppendString(new_row, &curr_row->data[current_file->cursor.x],
