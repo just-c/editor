@@ -14,12 +14,10 @@
 EditorConCmdArgs args;
 
 static void cvarSyntaxCallback(void);
-static void cvarMouseCallback(void);
 
 CONVAR(tabsize, "Tab size.", "4", cvarSyntaxCallback);
 CONVAR(autoindent, "Enable auto indent.", "0", NULL);
 CONVAR(bracket, "Use auto bracket completion.", "0", NULL);
-CONVAR(mouse, "Enable mouse mode.", "1", cvarMouseCallback);
 
 static void reloadSyntax(void) {
   for (int i = 0; i < editor.file_count; i++) {
@@ -30,17 +28,6 @@ static void reloadSyntax(void) {
 }
 
 static void cvarSyntaxCallback(void) { reloadSyntax(); }
-
-static void cvarMouseCallback(void) {
-  bool mode = CONVAR_GETINT(mouse);
-  if (editor.mouse_mode != mode) {
-    if (mode) {
-      enableMouse();
-    } else {
-      disableMouse();
-    }
-  }
-}
 
 const ColorElement color_element_map[EDITOR_COLOR_COUNT] = {
     {"bg", &editor.color_cfg.bg},
@@ -421,7 +408,6 @@ void editorInitConfig(void) {
   INIT_CONVAR(tabsize);
   INIT_CONVAR(autoindent);
   INIT_CONVAR(bracket);
-  INIT_CONVAR(mouse);
 
   INIT_CONCOMMAND(color);
   INIT_CONCOMMAND(newline);

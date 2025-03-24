@@ -346,7 +346,6 @@ void resizeWindow(void) {
 void editorInitTerminal(void) {
   enableRawMode();
   enableSwap();
-  // Mouse mode default on
   enableMouse();
   atexit(terminalExit);
   resizeWindow();

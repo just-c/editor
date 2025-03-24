@@ -55,7 +55,6 @@ the file in the current directory, then the configuration directory.
 | tabsize    | 4       | Tab size.                                 |
 | autoindent | 0       | Enable auto indent.                       |
 | bracket    | 0       | Use auto bracket completion.              |
-| mouse      | 1       | Enable mouse mode.                        |
 | color      | cmd     | Change the color of an element.           |
 | exec       | cmd     | Execute a config file.                    |
 | newline    | cmd     | Set the EOL sequence (LF/CRLF).           |
