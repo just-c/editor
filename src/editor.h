@@ -27,9 +27,6 @@ typedef struct EditorFile {
   // Hidden cursor x position
   int sx;
 
-  // bracket complete level
-  int bracket_autocomplete;
-
   // Editor offsets
   int row_offset;
   int col_offset;

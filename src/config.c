@@ -16,7 +16,6 @@ EditorConCmdArgs args;
 static void cvarSyntaxCallback(void);
 
 CONVAR(tabsize, "Tab size.", "4", cvarSyntaxCallback);
-CONVAR(bracket, "Use auto bracket completion.", "0", NULL);
 
 static void reloadSyntax(void) {
   for (int i = 0; i < editor.file_count; i++) {
@@ -405,7 +404,6 @@ bool editorLoadConfig(const char* path) {
 void editorInitConfig(void) {
   // Init commands
   INIT_CONVAR(tabsize);
-  INIT_CONVAR(bracket);
 
   INIT_CONCOMMAND(color);
   INIT_CONCOMMAND(newline);

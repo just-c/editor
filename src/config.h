@@ -9,7 +9,6 @@
 typedef struct EditorConCmd EditorConCmd;
 
 extern EditorConCmd cvar_tabsize;
-extern EditorConCmd cvar_bracket;
 
 typedef struct EditorColorScheme EditorColorScheme;
 extern const EditorColorScheme color_default;

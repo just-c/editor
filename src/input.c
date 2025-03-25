@@ -201,32 +201,6 @@ static void editorSelectWord(const EditorRow* row, int cx, IsCharFunc is_char) {
   current_file->cursor.is_selected = true;
 }
 
-static char isOpenBracket(int key) {
-  switch (key) {
-    case '(':
-      return ')';
-    case '[':
-      return ']';
-    case '{':
-      return '}';
-    default:
-      return 0;
-  }
-}
-
-static char isCloseBracket(int key) {
-  switch (key) {
-    case ')':
-      return '(';
-    case ']':
-      return '[';
-    case '}':
-      return '{';
-    default:
-      return 0;
-  }
-}
-
 static int handleTabClick(int x) {
   if (editor.loading) return -1;
 
@@ -354,8 +328,6 @@ void editorProcessKeypress(void) {
         current_file->cursor.is_selected = false;
       }
 
-      current_file->bracket_autocomplete = 0;
-
       edit->added_range.start_x = current_file->cursor.x;
       edit->added_range.start_y = current_file->cursor.y;
       editorInsertNewline();
@@ -427,7 +399,6 @@ void editorProcessKeypress(void) {
       current_file->sx =
           editorRowCxToRx(&current_file->row[current_file->cursor.y], start_x);
       current_file->cursor.is_selected = (c == (SHIFT_HOME));
-      current_file->bracket_autocomplete = 0;
     } break;
 
     case END_KEY:
@@ -439,7 +410,6 @@ void editorProcessKeypress(void) {
         current_file->sx = editorRowCxToRx(
             &current_file->row[current_file->cursor.y], current_file->cursor.x);
         current_file->cursor.is_selected = (c == SHIFT_END);
-        current_file->bracket_autocomplete = 0;
       }
       break;
 
@@ -447,21 +417,18 @@ void editorProcessKeypress(void) {
     case SHIFT_CTRL_LEFT:
       editorMoveCursorWordLeft();
       current_file->cursor.is_selected = (c == SHIFT_CTRL_LEFT);
-      current_file->bracket_autocomplete = 0;
       break;
 
     case CTRL_RIGHT:
     case SHIFT_CTRL_RIGHT:
       editorMoveCursorWordRight();
       current_file->cursor.is_selected = (c == SHIFT_CTRL_RIGHT);
-      current_file->bracket_autocomplete = 0;
       break;
 
     // Find
     case CTRL_KEY('f'):
       should_scroll = false;
       current_file->cursor.is_selected = false;
-      current_file->bracket_autocomplete = 0;
       editorFind();
       break;
 
@@ -469,7 +436,6 @@ void editorProcessKeypress(void) {
     case CTRL_KEY('g'):
       should_scroll = false;
       current_file->cursor.is_selected = false;
-      current_file->bracket_autocomplete = 0;
       editorGotoLine();
       break;
 
@@ -477,7 +443,6 @@ void editorProcessKeypress(void) {
     SELECT_ALL:
       if (current_file->num_rows == 1 && current_file->row[0].size == 0) break;
       current_file->cursor.is_selected = true;
-      current_file->bracket_autocomplete = 0;
       current_file->cursor.y = current_file->num_rows - 1;
       current_file->cursor.x =
           current_file->row[current_file->num_rows - 1].size;
@@ -514,32 +479,10 @@ void editorProcessKeypress(void) {
         break;
       }
 
-      bool should_delete_bracket =
-          current_file->bracket_autocomplete &&
-          (isCloseBracket(current_file->row[current_file->cursor.y]
-                              .data[current_file->cursor.x]) ==
-               current_file->row[current_file->cursor.y]
-                   .data[current_file->cursor.x - 1] ||
-           (current_file->row[current_file->cursor.y]
-                    .data[current_file->cursor.x] == '\'' &&
-            current_file->row[current_file->cursor.y]
-                    .data[current_file->cursor.x - 1] == '\'') ||
-           (current_file->row[current_file->cursor.y]
-                    .data[current_file->cursor.x] == '"' &&
-            current_file->row[current_file->cursor.y]
-                    .data[current_file->cursor.x - 1] == '"'));
-
-      if (c == DEL_KEY)
-        editorMoveCursor(ARROW_RIGHT);
-      else if (should_delete_bracket) {
-        current_file->bracket_autocomplete--;
-        editorMoveCursor(ARROW_RIGHT);
-      }
+      if (c == DEL_KEY) editorMoveCursor(ARROW_RIGHT);
 
       edit->deleted_range.end_x = current_file->cursor.x;
       edit->deleted_range.end_y = current_file->cursor.y;
-
-      if (should_delete_bracket) editorMoveCursor(ARROW_LEFT);
 
       editorMoveCursor(ARROW_LEFT);
 
@@ -639,14 +582,12 @@ void editorProcessKeypress(void) {
     // Undo
     case CTRL_KEY('z'):
       current_file->cursor.is_selected = false;
-      current_file->bracket_autocomplete = 0;
       should_scroll = editorUndo();
       break;
 
     // Redo
     case CTRL_KEY('y'):
       current_file->cursor.is_selected = false;
-      current_file->bracket_autocomplete = 0;
       should_scroll = editorRedo();
       break;
 
@@ -688,7 +629,6 @@ void editorProcessKeypress(void) {
     case PAGE_DOWN:
       current_file->cursor.is_selected =
           (c == SHIFT_PAGE_UP || c == SHIFT_PAGE_DOWN);
-      current_file->bracket_autocomplete = 0;
       {
         if (c == PAGE_UP || c == SHIFT_PAGE_UP) {
           current_file->cursor.y = current_file->row_offset;
@@ -722,7 +662,6 @@ void editorProcessKeypress(void) {
     case SHIFT_CTRL_PAGE_UP:
     case CTRL_PAGE_UP:
       current_file->cursor.is_selected = (c == SHIFT_CTRL_PAGE_UP);
-      current_file->bracket_autocomplete = 0;
       while (current_file->cursor.y > 0) {
         editorMoveCursor(ARROW_UP);
         if (current_file->row[current_file->cursor.y].size == 0) {
@@ -734,7 +673,6 @@ void editorProcessKeypress(void) {
     case SHIFT_CTRL_PAGE_DOWN:
     case CTRL_PAGE_DOWN:
       current_file->cursor.is_selected = (c == SHIFT_CTRL_PAGE_DOWN);
-      current_file->bracket_autocomplete = 0;
       while (current_file->cursor.y < current_file->num_rows - 1) {
         editorMoveCursor(ARROW_DOWN);
         if (current_file->row[current_file->cursor.y].size == 0) {
@@ -765,13 +703,6 @@ void editorProcessKeypress(void) {
         }
         current_file->cursor.is_selected = false;
       } else {
-        if (current_file->bracket_autocomplete) {
-          if (c == ARROW_RIGHT) {
-            current_file->bracket_autocomplete--;
-          } else {
-            current_file->bracket_autocomplete = 0;
-          }
-        }
         editorMoveCursor(c);
       }
       break;
@@ -781,13 +712,11 @@ void editorProcessKeypress(void) {
     case SHIFT_LEFT:
     case SHIFT_RIGHT:
       current_file->cursor.is_selected = true;
-      current_file->bracket_autocomplete = 0;
       editorMoveCursor(c - 9);
       break;
 
     case CTRL_HOME:
       current_file->cursor.is_selected = false;
-      current_file->bracket_autocomplete = 0;
       current_file->cursor.y = 0;
       current_file->cursor.x = 0;
       current_file->sx = 0;
@@ -795,7 +724,6 @@ void editorProcessKeypress(void) {
 
     case CTRL_END:
       current_file->cursor.is_selected = false;
-      current_file->bracket_autocomplete = 0;
       current_file->cursor.y = current_file->num_rows - 1;
       current_file->cursor.x =
           current_file->row[current_file->num_rows - 1].size;
@@ -916,8 +844,6 @@ void editorProcessKeypress(void) {
       pressed = true;
       curr_x = x;
       curr_y = y;
-
-      current_file->bracket_autocomplete = 0;
 
       mousePosToEditorPos(&x, &y);
       int cx = editorRowRxToCx(&current_file->row[y], x);
@@ -1049,46 +975,7 @@ void editorProcessKeypress(void) {
       edit->added_range.start_x = current_file->cursor.x;
       edit->added_range.start_y = current_file->cursor.y;
 
-      int close_bracket = isOpenBracket(c);
-      int open_bracket = isCloseBracket(c);
-      if (!CONVAR_GETINT(bracket)) {
-        editorInsertUnicode(c);
-      } else if (close_bracket) {
-        editorInsertChar(c);
-        editorInsertChar(close_bracket);
-        x_offset = 1;
-        current_file->cursor.x--;
-        current_file->bracket_autocomplete++;
-      } else if (open_bracket) {
-        if (current_file->bracket_autocomplete &&
-            current_file->row[current_file->cursor.y]
-                    .data[current_file->cursor.x] == c) {
-          current_file->bracket_autocomplete--;
-          x_offset = -1;
-          current_file->cursor.x++;
-        } else {
-          editorInsertChar(c);
-        }
-      } else if (c == '\'' || c == '"') {
-        if (current_file->row[current_file->cursor.y]
-                .data[current_file->cursor.x] != c) {
-          editorInsertChar(c);
-          editorInsertChar(c);
-          x_offset = 1;
-          current_file->cursor.x--;
-          current_file->bracket_autocomplete++;
-        } else if (current_file->bracket_autocomplete &&
-                   current_file->row[current_file->cursor.y]
-                           .data[current_file->cursor.x] == c) {
-          current_file->bracket_autocomplete--;
-          x_offset = -1;
-          current_file->cursor.x++;
-        } else {
-          editorInsertChar(c);
-        }
-      } else {
-        editorInsertUnicode(c);
-      }
+      editorInsertUnicode(c);
 
       edit->added_range.end_x = current_file->cursor.x + x_offset;
       edit->added_range.end_y = current_file->cursor.y;
