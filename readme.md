@@ -50,7 +50,6 @@ the file in the current directory, then the configuration directory.
 
 | Name    | Default | Description                               |
 | ------- | ------- | ----------------------------------------- |
-| tabsize | 4       | Tab size.                                 |
 | color   | cmd     | Change the color of an element.           |
 | exec    | cmd     | Execute a config file.                    |
 | newline | cmd     | Set the EOL sequence (LF/CRLF).           |

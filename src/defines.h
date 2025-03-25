@@ -7,6 +7,8 @@
 #define HL_HIGHLIGHT_NUMBERS (1 << 0)
 #define HL_HIGHLIGHT_STRINGS (1 << 1)
 
+#define TABSIZE 2
+
 enum EditorKey {
   UNKNOWN = -1,
   ESC = 27,

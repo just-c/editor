@@ -13,20 +13,6 @@
 
 EditorConCmdArgs args;
 
-static void cvarSyntaxCallback(void);
-
-CONVAR(tabsize, "Tab size.", "4", cvarSyntaxCallback);
-
-static void reloadSyntax(void) {
-  for (int i = 0; i < editor.file_count; i++) {
-    for (int j = 0; j < editor.files[i].num_rows; j++) {
-      editorUpdateRow(&editor.files[i].row[j]);
-    }
-  }
-}
-
-static void cvarSyntaxCallback(void) { reloadSyntax(); }
-
 const ColorElement color_element_map[EDITOR_COLOR_COUNT] = {
     {"bg", &editor.color_cfg.bg},
 
@@ -403,8 +389,6 @@ bool editorLoadConfig(const char* path) {
 
 void editorInitConfig(void) {
   // Init commands
-  INIT_CONVAR(tabsize);
-
   INIT_CONCOMMAND(color);
   INIT_CONCOMMAND(newline);
 

@@ -329,7 +329,7 @@ static void editorDrawRows(abuf* ab) {
           if (c[j] == '\t') {
             abufAppend(ab, " ");
             rx++;
-            while (rx % CONVAR_GETINT(tabsize) != 0 && rx < rlen) {
+            while (rx % TABSIZE != 0 && rx < rlen) {
               abufAppend(ab, " ");
               rx++;
             }
