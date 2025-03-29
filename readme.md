@@ -48,13 +48,12 @@ the file in the current directory, then the configuration directory.
 
 ## Commands and ConVars
 
-| Name    | Default | Description                               |
-| ------- | ------- | ----------------------------------------- |
-| color   | cmd     | Change the color of an element.           |
-| exec    | cmd     | Execute a config file.                    |
-| newline | cmd     | Set the EOL sequence (LF/CRLF).           |
-| echo    | cmd     | Clear all console output.                 |
-| find    | cmd     | Find concommands by their name/help text. |
+| Name    | Default | Description                     |
+| ------- | ------- | ------------------------------- |
+| color   | cmd     | Change the color of an element. |
+| exec    | cmd     | Execute a config file.          |
+| newline | cmd     | Set the EOL sequence (LF/CRLF). |
+| echo    | cmd     | Clear all console output.       |
 
 ## Color
 
