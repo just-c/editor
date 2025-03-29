@@ -135,11 +135,6 @@ CON_COMMAND(newline, "Set the EOL sequence (LF/CRLF).") {
   editorAppendAction(action);
 }
 
-CON_COMMAND(clear, "Clear all console output.") {
-  UNUSED(args.argc);
-  editorMsgClear();
-}
-
 static void showCmdHelp(const EditorConCmd* cmd) {
   if (cmd->has_callback) {
     editorMsg("\"%s\"", cmd->name);
@@ -336,9 +331,7 @@ void editorInitConfig(void) {
   // Init commands
   INIT_CONCOMMAND(color);
   INIT_CONCOMMAND(newline);
-
   INIT_CONCOMMAND(exec);
-  INIT_CONCOMMAND(clear);
 
 #ifdef _DEBUG
   INIT_CONCOMMAND(crash);
