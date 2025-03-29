@@ -135,29 +135,6 @@ CON_COMMAND(newline, "Set the EOL sequence (LF/CRLF).") {
   editorAppendAction(action);
 }
 
-CON_COMMAND(echo, "Echo text to console.") {
-  if (args.argc < 2) return;
-
-  int total_len = 0;
-  char buf[COMMAND_MAX_LENGTH];
-  memset(buf, 0, sizeof(buf));
-
-  for (int i = 1; i < args.argc; i++) {
-    int arg_len = strlen(args.argv[i]);
-    if (total_len + arg_len + 1 <= COMMAND_MAX_LENGTH) {
-      if (i > 1) {
-        strcat(buf, " ");
-        total_len++;
-      }
-      strcat(buf, args.argv[i]);
-      total_len += arg_len;
-    } else {
-      break;
-    }
-  }
-  editorMsg("%s", buf);
-}
-
 CON_COMMAND(clear, "Clear all console output.") {
   UNUSED(args.argc);
   editorMsgClear();
@@ -361,7 +338,6 @@ void editorInitConfig(void) {
   INIT_CONCOMMAND(newline);
 
   INIT_CONCOMMAND(exec);
-  INIT_CONCOMMAND(echo);
   INIT_CONCOMMAND(clear);
 
 #ifdef _DEBUG
