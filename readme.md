@@ -54,7 +54,6 @@ the file in the current directory, then the configuration directory.
 | exec    | cmd     | Execute a config file.                    |
 | newline | cmd     | Set the EOL sequence (LF/CRLF).           |
 | echo    | cmd     | Clear all console output.                 |
-| help    | cmd     | Find help about a convar/concommand.      |
 | find    | cmd     | Find concommands by their name/help text. |
 
 ## Color

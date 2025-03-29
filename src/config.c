@@ -177,19 +177,6 @@ static void showCmdHelp(const EditorConCmd* cmd) {
   editorMsg(" - %s", cmd->help_string);
 }
 
-CON_COMMAND(help, "Find help about a convar/concommand.") {
-  if (args.argc != 2) {
-    editorMsg("Usage: help <command>");
-    return;
-  }
-  EditorConCmd* cmd = editorFindCmd(args.argv[1]);
-  if (!cmd) {
-    editorMsg("help: No cvar or command named \"%s\".", args.argv[1]);
-    return;
-  }
-  showCmdHelp(cmd);
-}
-
 CON_COMMAND(
     find,
     "Find concommands with the specified string in their name/help text.") {
@@ -395,7 +382,6 @@ void editorInitConfig(void) {
   INIT_CONCOMMAND(exec);
   INIT_CONCOMMAND(echo);
   INIT_CONCOMMAND(clear);
-  INIT_CONCOMMAND(help);
   INIT_CONCOMMAND(find);
 
 #ifdef _DEBUG
