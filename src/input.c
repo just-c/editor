@@ -289,11 +289,6 @@ void editorProcessKeypress(void) {
 
   // Global keybinds
   switch (input.type) {
-    // Prompt
-    case CTRL_KEY('p'):
-      editorOpenConfigPrompt();
-      return;
-
     // Open file
     case CTRL_KEY('o'):
       editorOpenFilePrompt();

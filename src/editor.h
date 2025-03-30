@@ -71,9 +71,6 @@ typedef struct Editor {
   // Color settings
   EditorColorScheme color_cfg;
 
-  // ConCmd linked list
-  EditorConCmd* cvars;
-
   // Files
   EditorFile files[EDITOR_FILE_MAX_SLOT];
   int file_count;

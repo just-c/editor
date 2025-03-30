@@ -21,7 +21,6 @@ void editorInit(void) {
   editor.con_front = -1;
 
   editorInitTerminal();
-  editorInitConfig();
 
   // Draw loading
   memset(&editor.files[0], 0, sizeof(EditorFile));
@@ -34,7 +33,6 @@ void editorFree(void) {
     editorFreeFile(&editor.files[i]);
   }
   editorFreeClipboardContent(&editor.clipboard);
-  editorFreeConfig();
 }
 
 void editorInitFile(EditorFile* file) {
