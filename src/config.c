@@ -66,29 +66,6 @@ static void showCmdHelp(const EditorConCmd* cmd) {
   editorMsg(" - %s", cmd->help_string);
 }
 
-#ifdef _DEBUG
-
-CON_COMMAND(crash, "Cause the editor to crash. (Debug!!)") {
-  int crash_type = 0;
-  if (args.argc > 1) {
-    crash_type = strToInt(args.argv[1]);
-  }
-
-  switch (crash_type) {
-    case 0:
-      // SIGSEGV
-      *(volatile char*)0 = 0;
-      break;
-    case 1:
-      // SIGABRT
-      abort();
-    default:
-      editorMsg("Unknown crash type.");
-  }
-}
-
-#endif
-
 const EditorColorScheme color_default = {
     .bg = {30, 30, 30},
     .top_status =
@@ -245,10 +222,6 @@ bool editorLoadConfig(const char* path) {
 }
 
 void editorInitConfig(void) {
-#ifdef _DEBUG
-  INIT_CONCOMMAND(crash);
-#endif
-
   // Load defualt config
   char path[EDITOR_PATH_MAX] = {0};
   const char* home_dir = getenv(ENV_HOME);
