@@ -52,34 +52,6 @@ const ColorElement color_element_map[EDITOR_COLOR_COUNT] = {
     {"hl.trailing", &editor.color_cfg.highlightBg[HL_BG_TRAILING]},
 };
 
-CON_COMMAND(color, "Change the color of an element.") {
-  if (args.argc != 2 && args.argc != 3) {
-    editorMsg("Usage: color <element> [color]");
-    return;
-  }
-
-  Color* target = NULL;
-  int element_num = sizeof(color_element_map) / sizeof(ColorElement);
-  for (int i = 0; i < element_num; i++) {
-    if (strcmp(color_element_map[i].label, args.argv[1]) == 0) {
-      target = color_element_map[i].color;
-      break;
-    }
-  }
-  if (!target) {
-    editorMsg("Unknown element \"%s\".", args.argv[1]);
-    return;
-  }
-
-  if (args.argc == 2) {
-    char buf[8];
-    colorToStr(*target, buf);
-    editorMsg("%s = %s", args.argv[1], buf);
-  } else if (args.argc == 3) {
-    *target = strToColor(args.argv[2]);
-  }
-}
-
 CON_COMMAND(exec, "Execute a config file.") {
   if (args.argc != 2) {
     editorMsg("Usage: exec <file>");
@@ -329,7 +301,6 @@ bool editorLoadConfig(const char* path) {
 
 void editorInitConfig(void) {
   // Init commands
-  INIT_CONCOMMAND(color);
   INIT_CONCOMMAND(newline);
   INIT_CONCOMMAND(exec);
 
