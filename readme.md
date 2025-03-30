@@ -31,12 +31,6 @@ make
 make install
 ```
 
-## Commands and ConVars
-
-| Name    | Default | Description                     |
-| ------- | ------- | ------------------------------- |
-| newline | cmd     | Set the EOL sequence (LF/CRLF). |
-
 ## Color
 
 When color code is `000000` it will be transparent.

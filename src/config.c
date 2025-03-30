@@ -52,37 +52,6 @@ const ColorElement color_element_map[EDITOR_COLOR_COUNT] = {
     {"hl.trailing", &editor.color_cfg.highlightBg[HL_BG_TRAILING]},
 };
 
-CON_COMMAND(newline, "Set the EOL sequence (LF/CRLF).") {
-  if (args.argc == 1) {
-    editorMsg("%s", (current_file->newline == NL_UNIX) ? "LF" : "CRLF");
-    return;
-  }
-
-  int nl;
-
-  if (strCaseCmp(args.argv[1], "lf") == 0) {
-    nl = NL_UNIX;
-  } else if (strCaseCmp(args.argv[1], "crlf") == 0) {
-    nl = NL_DOS;
-  } else {
-    editorMsg("Usage: newline <LF/CRLF>");
-    return;
-  }
-
-  if (current_file->newline == nl) {
-    return;
-  }
-
-  EditorAction* action = calloc_s(1, sizeof(EditorAction));
-  action->type = ACTION_ATTRI;
-  action->attri.new_newline = nl;
-  action->attri.old_newline = current_file->newline;
-
-  current_file->newline = nl;
-
-  editorAppendAction(action);
-}
-
 static void showCmdHelp(const EditorConCmd* cmd) {
   if (cmd->has_callback) {
     editorMsg("\"%s\"", cmd->name);
@@ -276,9 +245,6 @@ bool editorLoadConfig(const char* path) {
 }
 
 void editorInitConfig(void) {
-  // Init commands
-  INIT_CONCOMMAND(newline);
-
 #ifdef _DEBUG
   INIT_CONCOMMAND(crash);
 #endif
