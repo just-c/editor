@@ -52,30 +52,6 @@ const ColorElement color_element_map[EDITOR_COLOR_COUNT] = {
     {"hl.trailing", &editor.color_cfg.highlightBg[HL_BG_TRAILING]},
 };
 
-CON_COMMAND(exec, "Execute a config file.") {
-  if (args.argc != 2) {
-    editorMsg("Usage: exec <file>");
-    return;
-  }
-
-  char filename[EDITOR_PATH_MAX] = {0};
-  snprintf(filename, sizeof(filename), "%s", args.argv[1]);
-  addDefaultExtension(filename, ".nino", sizeof(filename));
-
-  if (!editorLoadConfig(filename)) {
-    // Try config directory
-    char config_path[EDITOR_PATH_MAX];
-    int len =
-        snprintf(config_path, sizeof(config_path),
-                 PATH_CAT("%s", CONF_DIR, "%s"), getenv(ENV_HOME), filename);
-
-    if (len < 0 || !editorLoadConfig(config_path)) {
-      editorMsg("exec: Failed to exec \"%s\"", args.argv[1]);
-      return;
-    }
-  }
-}
-
 CON_COMMAND(newline, "Set the EOL sequence (LF/CRLF).") {
   if (args.argc == 1) {
     editorMsg("%s", (current_file->newline == NL_UNIX) ? "LF" : "CRLF");
@@ -302,7 +278,6 @@ bool editorLoadConfig(const char* path) {
 void editorInitConfig(void) {
   // Init commands
   INIT_CONCOMMAND(newline);
-  INIT_CONCOMMAND(exec);
 
 #ifdef _DEBUG
   INIT_CONCOMMAND(crash);

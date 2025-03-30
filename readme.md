@@ -31,26 +31,10 @@ make
 make install
 ```
 
-## Configuration
-
-Configurations are set by running commands.
-
-Use `Ctrl+P` to open the command prompt.
-
-To run commands on start, create `ninorc` in the configuration directory.
-
-Configuration directory:
-
-- `~/.config/nino`
-
-The `exec` command executes a config file. The command will first search for
-the file in the current directory, then the configuration directory.
-
 ## Commands and ConVars
 
 | Name    | Default | Description                     |
 | ------- | ------- | ------------------------------- |
-| exec    | cmd     | Execute a config file.          |
 | newline | cmd     | Set the EOL sequence (LF/CRLF). |
 
 ## Color
